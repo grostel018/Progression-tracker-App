@@ -1,0 +1,126 @@
+/* 1) Reset everything */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Courier New", monospace;
+}
+
+/* 2) Ultra-dark terminal background */
+body {
+    background: #000000; /* pure black */
+    color: #00ff00; /* classic terminal green */
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 3) Terminal login box */
+.container {
+    background: #000000;
+    border: 2px solid #00ff00;
+    padding: 25px 30px;
+    width: 100%;
+    max-width: 420px;
+}
+
+/* 4) Center headings */
+header, main, footer {
+    text-align: center;
+}
+
+/* 5) Input groups */
+.inputs {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+/* 6) Terminal inputs */
+input {
+    width: 100%;
+    padding: 8px;
+    background: #000000;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    font-family: "Courier New", monospace;
+}
+
+/* Remove blue glow on focus */
+input:focus {
+    outline: none;
+    box-shadow: 0 0 5px #00ff00;
+}
+
+/* 7) Remember + Forgot layout */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+}
+
+/* 8) Terminal button */
+.btn-primary {
+    width: 100%;
+    padding: 8px;
+    background: #000000;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+}
+
+.btn-primary:hover {
+    background: #00ff00;
+    color: #000000;
+}
+
+/* 9) Links */
+a {
+    color: #00ff00;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 10) Footer small terminal text */
+footer {
+    margin-top: 10px;
+    font-size: 0.7rem;
+    opacity: 0.6;
+}
+
+/* Hide default checkbox */
+.terminal-checkbox input {
+    display: none;
+}
+
+/* Hide real checkbox */
+.terminal-checkbox input {
+    display: none;
+}
+
+/* Label layout */
+.terminal-checkbox {
+    cursor: pointer;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Default ASCII box */
+.checkmark::before {
+    content: "[ ]";
+}
+
+/* When checked */
+.terminal-checkbox input:checked + .checkmark::before {
+    content: "[X]";
+}
+

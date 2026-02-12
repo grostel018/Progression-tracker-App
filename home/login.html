@@ -1,83 +1,92 @@
 <!DOCTYPE html>
-
-<html lang ="en">
+<html lang="en">
 
 <head>
     <!-- Meta -->
     <meta charset="UTF-8">
-    <title>Progression tracker App</title>
-    <meta name = "description" content="Progression tracker App login page">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progression Tracker App</title>
+    <meta name="description" content="Progression Tracker App login page">
 
-    <!-- CSS styles -->
-    <link rel="stylesheet"  href="style.css" >
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
     <script defer src="script.js"></script>
 </head>
 
-
-
 <body>
-    <!-- header -->
-<div class = "container">
-     <header>
-    <h1> <b>Welcome to the Progression tracker App</b></h1>
+
+<div class="container">
+
+<header>
+    <h1>Progress Tracking App</h1>
     <hr>
-    
-    </header>
-    <main>   
-        <section> 
+</header>
 
-        <h2>Login to proceed</h2>
-        <form action="/" method="GET" id="loginForm">
+<main>
+<section class="auth-section">
 
-            <!-- Email -->
-            <div>
-        <label for="email">E-mail </label>
-        <input type="email" id="email" name="email" placeholder="example@mail.com" required>
-            </div>
-            <!-- Password -->
-            <div>
-        <label for="password">Enter password </label>
-        <input  input type="password" id="password" name="password" minlength="6" required>
-            </div>
-            
+    <h2>Login to proceed</h2>
 
-            <!-- Remember + Forgot -->
-            <div class="form-options">
-                <label>
-                    <input type="checkbox" name="remember"> Remember for 30 days
-                </label>
+    <form action="/" method="POST" id="loginForm" novalidate>
+
+        <!-- Email -->
+        <div class="inputs">
+            <label for="email">E-mail</label>
+            <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                placeholder="example@mail.com" 
+                autocomplete="email"
+                required>
+        </div>
+
+        <!-- Password -->
+        <div class="inputs">
+            <label for="password">Password</label>
+            <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                minlength="6" 
+                autocomplete="current-password"
+                required>
+        </div>
+
+        <!-- Remember + Forgot -->
+        <div class="form-options">
+            <label class="terminal-checkbox">
+            <input type="checkbox" name="remember">
+            <span class="checkmark"></span>
+            Remember for 30 days
+           </label>
+
+
             <a href="forgot.html" class="forgot-link">Forgot password?</a>
-            </div>
+        </div>
 
-            <!-- Error Message -->
-            <div id="error"></div>
+        <!-- Error Message -->
+        <div id="error" aria-live="polite"></div>
 
-            <!-- Submit Button -->
-        <button type="submit" class="btn-primary"> Login </button>
-    
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary">Login</button>
 
-        <p style="text-align: center;" > <strong>New user ? </strong><a href="register.html">Click here to Register</a></p>
-        
-        </section>
-        </form>
-    </main>
+        <!-- Register Link -->
+        <p class="register-text">
+            <strong>New user?</strong>
+            <a href="register.html">Click here to Register</a>
+        </p>
 
-    <footer>
+    </form>
 
+</section>
+</main>
+
+<footer>
     <p>&copy; 2026 Rostel Ebele GENI NDOUDI. All rights reserved.</p>
-
-    </footer>
+</footer>
 
 </div>
+
 </body>
-
-
-
-
-
-
-
-
-
-
 </html>
