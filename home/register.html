@@ -5,6 +5,8 @@
 <head>
     <!-- Meta -->
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Progression tracker App</title>
     <meta name = "description" content="Progression tracker App login page">
 
@@ -27,7 +29,12 @@
         <br>
         <input  type="password">
         <br>
-        <button> Login </button>
+        <!-- Repeat Password -->
+            <div>
+        <label for="password">Repeat password </label>
+        <input type="password" id="password2" name="password2" minlength="6" required>
+            </div>
+        <button> Register </button>
         <p style="text-align: center;" > <strong>New user ? </strong><a href="register.html">Click here to Register</a></p>
         </div>
     </main>
