@@ -98,6 +98,14 @@ function validateRegister(form) {
 
     return null;
 }
+/* =========================
+   INIT AUTH FORMS
+========================= */
+handleAuthForm("loginForm", "backend/login.php", "/Progression_Tracker_App/home/welcome/setup.php");
+handleAuthForm("registerForm", "backend/register.php", "login.html", validateRegister);
+handleAuthForm("forgotForm", "backend/forgot.php", "login.html");
+
+
 
 
 /* =========================
@@ -130,6 +138,8 @@ function handleAuthForm(formId, url, redirectUrl, validator = null) {
 
         if (result.includes("SUCCESS")) {
             errorBox.textContent = "> Success. Redirecting...";
+            console.log("Redirecting to:", redirectUrl);
+
             setTimeout(() => window.location.href = redirectUrl, 800);
         } 
         else if (result === "SERVER_ERROR") {
@@ -142,9 +152,3 @@ function handleAuthForm(formId, url, redirectUrl, validator = null) {
 }
 
 
-/* =========================
-   INIT AUTH FORMS
-========================= */
-handleAuthForm("loginForm", "backend/login.php", "setup.html");
-handleAuthForm("registerForm", "backend/register.php", "login.html", validateRegister);
-handleAuthForm("forgotForm", "backend/forgot.php", "login.html");
