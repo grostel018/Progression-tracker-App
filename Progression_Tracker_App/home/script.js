@@ -136,18 +136,30 @@ function handleAuthForm(formId, url, redirectUrl, validator = null) {
         const data = new FormData(form);
         const result = await postForm(url, data);
 
-        if (result.includes("SUCCESS")) {
-            errorBox.textContent = "> Success. Redirecting...";
-            console.log("Redirecting to:", redirectUrl);
-
-            setTimeout(() => window.location.href = redirectUrl, 800);
-        } 
-        else if (result === "SERVER_ERROR") {
-            errorBox.textContent = "> Server offline. Try later.";
-        } 
-        else {
-            errorBox.textContent = "> " + result;
+        if (!result) {
+        errorBox.textContent = "> Empty server response";
         }
+        else if (result.includes("<br") || result.includes("Fatal error")) {
+        console.error("PHP error:", result);
+        errorBox.textContent = "> Server crashed. Try later.";
+        }
+        else if (result.includes("SUCCESS")) {
+        errorBox.textContent = "> Success. Redirecting...";
+        console.log("Redirecting to:", redirectUrl);
+        setTimeout(() => window.location.href = redirectUrl, 800);
+        }
+        else if (result === "SERVER_ERROR") {
+        errorBox.textContent = "> Server offline. Try later.";
+        }
+        else if (result.includes("DB failed") || result.includes("SQLSTATE")) {
+        console.error("Backend DB error:", result);
+        errorBox.textContent = "> Server database offline.";
+        }
+
+        else {
+        errorBox.textContent = "> " + result;
+        }       
+
     });
 }
 

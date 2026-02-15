@@ -48,6 +48,7 @@ body.loaded {
     width: 8px;
     background: #00ff00;
     animation: blink 1s infinite;
+    
 }
 
 @keyframes blink {
