@@ -14,11 +14,13 @@ class LoginHandler
 {
     private PDO $db;
     private Auth $auth;
+    private AuthInputValidator $validator;
 
     public function __construct()
     {
         $this->db = Database::getConnection();
         $this->auth = new Auth($this->db, config('app'));
+        $this->validator = new AuthInputValidator(config('app'));
     }
 
     public function handle(array $input): array
@@ -26,16 +28,11 @@ class LoginHandler
         $email = trim($input['email'] ?? '');
         $password = $input['password'] ?? '';
 
-        // Validate input
-        if (empty($email) || empty($password)) {
-            return ['success' => false, 'message' => 'Email and password are required'];
+        $validation = $this->validator->validateLogin($input);
+        if ($validation !== []) {
+            return ['success' => false] + $validation;
         }
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return ['success' => false, 'message' => 'Invalid email format'];
-        }
-
-        // Attempt login
         $result = $this->auth->attempt($email, $password);
 
         if ($result === true) {

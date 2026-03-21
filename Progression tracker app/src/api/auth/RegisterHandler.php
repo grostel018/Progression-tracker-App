@@ -14,11 +14,13 @@ class RegisterHandler
 {
     private PDO $db;
     private Auth $auth;
+    private AuthInputValidator $validator;
 
     public function __construct()
     {
         $this->db = Database::getConnection();
         $this->auth = new Auth($this->db, config('app'));
+        $this->validator = new AuthInputValidator(config('app'));
     }
 
     public function handle(array $input): array
@@ -28,24 +30,19 @@ class RegisterHandler
         $password = $input['password'] ?? '';
         $passwordConfirm = $input['password2'] ?? '';
 
-        // Validate input
-        if (empty($username) || empty($email) || empty($password)) {
-            return ['success' => false, 'message' => 'All fields are required'];
+        $validation = $this->validator->validateRegister($input);
+        if ($validation !== []) {
+            return ['success' => false] + $validation;
         }
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return ['success' => false, 'message' => 'Invalid email format'];
-        }
-
-        if ($password !== $passwordConfirm) {
-            return ['success' => false, 'message' => 'Passwords do not match'];
-        }
-
-        // Attempt registration
         $result = $this->auth->register($username, $email, $password);
 
         if ($result === true) {
             return ['success' => true, 'message' => 'Registration successful'];
+        }
+
+        if (is_array($result)) {
+            return ['success' => false] + $result;
         }
 
         return ['success' => false, 'message' => $result];

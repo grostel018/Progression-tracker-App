@@ -119,7 +119,7 @@ class Auth
     /**
      * Register new user
      */
-    public function register(string $username, string $email, string $password): bool|string
+    public function register(string $username, string $email, string $password): bool|array|string
     {
         if (strlen($password) < $this->config['password_min_length']) {
             return sprintf('Password must be at least %d characters', $this->config['password_min_length']);
@@ -129,14 +129,24 @@ class Auth
         $stmt = $this->db->prepare('SELECT id FROM users WHERE email = ?');
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
-            return 'Email already registered';
+            return [
+                'message' => 'Email already registered',
+                'errors' => [
+                    'email' => 'Email already registered',
+                ],
+            ];
         }
 
         // Check if username exists
         $stmt = $this->db->prepare('SELECT id FROM users WHERE username = ?');
         $stmt->execute([$username]);
         if ($stmt->fetch()) {
-            return 'Username already taken';
+            return [
+                'message' => 'Username already taken',
+                'errors' => [
+                    'username' => 'Username already taken',
+                ],
+            ];
         }
 
         // Insert user

@@ -12,9 +12,37 @@
     <div class="container auth-shell">
         <section class="auth-intro" aria-label="Progression Tracker recovery">
             <div class="auth-copy">
-                <p class="auth-kicker">secure node // recovery</p>
+                <p class="auth-kicker">recovery tunnel // secure node</p>
                 <h1 id="title" class="auth-title"></h1>
                 <p id="subtitle" class="auth-subtitle"></p>
+            </div>
+            <div class="auth-console" aria-hidden="true">
+                <div class="auth-console-bar">
+                    <span>node://recovery</span>
+                    <span>mail route</span>
+                </div>
+                <ul class="auth-console-feed">
+                    <li>
+                        <span class="auth-console-index">01</span>
+                        <span class="auth-console-text">verified inbox route</span>
+                        <span class="auth-console-state">check</span>
+                    </li>
+                    <li>
+                        <span class="auth-console-index">02</span>
+                        <span class="auth-console-text">reset token handoff</span>
+                        <span class="auth-console-state">pending</span>
+                    </li>
+                    <li>
+                        <span class="auth-console-index">03</span>
+                        <span class="auth-console-text">session locks</span>
+                        <span class="auth-console-state">paused</span>
+                    </li>
+                    <li>
+                        <span class="auth-console-index">04</span>
+                        <span class="auth-console-text">return path</span>
+                        <span class="auth-console-state">prepared</span>
+                    </li>
+                </ul>
             </div>
             <div class="auth-status-grid" aria-hidden="true">
                 <div class="auth-status-item">
@@ -33,8 +61,8 @@
         </section>
         <section class="auth-panel">
             <header class="auth-panel-header">
-                <p class="auth-panel-label">Recovery Access</p>
-                <p class="auth-panel-copy">Request a reset link and restore access to your progress workspace.</p>
+                <p class="auth-panel-label">Recovery Console</p>
+                <p class="auth-panel-copy">Request a reset route, verify the inbox, and restore access to your progress workspace.</p>
             </header>
             <main class="auth-section">
                 <form action="api/auth/forgot.php" method="POST" id="forgotForm" novalidate>
@@ -43,7 +71,8 @@
                     </p>
                     <div class="inputs">
                         <label for="email">E-mail</label>
-                        <input type="email" id="email" name="email" placeholder="example@mail.com" autocomplete="email" required>
+                        <input type="email" id="email" name="email" placeholder="example@mail.com" autocomplete="email" inputmode="email" maxlength="254" aria-describedby="email-feedback" required>
+                        <p class="input-feedback" id="email-feedback" data-feedback-for="email" aria-live="polite"></p>
                     </div>
                     <div id="error" aria-live="polite"><?= isset($error) ? safe_output($error) : '' ?></div>
                     <div id="success" aria-live="polite"></div>
