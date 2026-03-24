@@ -4,11 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#040806">
     <title>Login - Progression Tracker</title>
     <link rel="stylesheet" href="<?= safe_output(asset_url('assets/css/style.css')) ?>">
     <script defer src="<?= safe_output(asset_url('assets/js/auth.js')) ?>"></script>
 </head>
 <body data-page="login">
+    <a class="skip-link" href="#auth-main">Skip to sign in form</a>
     <div class="container auth-shell">
         <section class="auth-intro" aria-label="Progression Tracker overview">
             <div class="auth-copy">
@@ -64,7 +66,7 @@
                 <p class="auth-panel-label">Access Console</p>
                 <p class="auth-panel-copy">Authenticate once, restore the latest checkpoint, and continue tracking without breaking flow.</p>
             </header>
-            <main class="auth-section">
+            <main class="auth-section" id="auth-main" tabindex="-1">
                 <form action="api/auth/login.php" method="POST" id="loginForm" novalidate>
                     <div class="inputs">
                         <label for="email">E-mail</label>

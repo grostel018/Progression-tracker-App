@@ -1,5 +1,6 @@
 (function () {
     let resizeBound = false;
+    let historyModalPreviousFocus = null;
 
     function getApp() {
         return window.dashboardApp;
@@ -65,6 +66,12 @@
         root.removeAttribute('data-scope');
         root.removeAttribute('data-entity-id');
         body.innerHTML = '';
+
+        const previous = historyModalPreviousFocus;
+        historyModalPreviousFocus = null;
+        if (previous && typeof previous.focus === 'function' && document.contains(previous)) {
+            previous.focus();
+        }
     }
 
     function setModalContext(panel, date) {
@@ -433,9 +440,14 @@
             return;
         }
 
+        historyModalPreviousFocus = document.activeElement;
         setModalContext(panel, date);
         root.hidden = false;
         body.innerHTML = '<div class="panel-empty-state"><p class="panel-empty-copy">Loading day details…</p></div>';
+
+        requestAnimationFrame(() => {
+            root.querySelector('.history-modal-close')?.focus();
+        });
 
         const data = await app.apiRequest(buildDayUrl(panel, date));
         if (!data || data.success === false) {
@@ -664,6 +676,14 @@
             if (event.target.closest('[data-history-close]')) {
                 closeModal();
             }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (root.hidden || event.key !== 'Escape') {
+                return;
+            }
+            event.preventDefault();
+            closeModal();
         });
 
         body?.addEventListener('submit', handleDayEntrySubmit);

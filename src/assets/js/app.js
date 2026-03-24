@@ -44,10 +44,26 @@ function setMessage(element, message, type = 'error') {
 }
 
 function showPageMessage(message, type = 'error') {
-    setMessage(getPageFeedback(), message, type);
+    const el = getPageFeedback();
+    setMessage(el, message, type);
+
+    if (!message || !el || el.hidden) {
+        return;
+    }
+
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+
+    if (type === 'success') {
+        clearTimeout(showPageMessage._autoClearTimer);
+        showPageMessage._autoClearTimer = window.setTimeout(() => {
+            clearPageMessage();
+        }, 4500);
+    }
 }
 
 function clearPageMessage() {
+    clearTimeout(showPageMessage._autoClearTimer);
     setMessage(getPageFeedback(), '');
 }
 

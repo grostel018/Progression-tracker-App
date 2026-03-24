@@ -213,7 +213,7 @@ include __DIR__ . '/../partials/dashboard-start.php';
                     <p class="section-kicker">History</p>
                     <h4>Activity And Progress</h4>
                 </div>
-                <div class="history-range-switch" data-range-switch>
+                <div class="history-range-switch" data-range-switch role="group" aria-label="Activity time range">
                     <button type="button" class="range-chip is-active" data-range="30d">30D</button>
                     <button type="button" class="range-chip" data-range="week">Week</button>
                     <button type="button" class="range-chip" data-range="month">Month</button>

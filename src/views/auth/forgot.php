@@ -4,11 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#040806">
     <title>Reset Password - Progression Tracker</title>
     <link rel="stylesheet" href="<?= safe_output(asset_url('assets/css/style.css')) ?>">
     <script defer src="<?= safe_output(asset_url('assets/js/auth.js')) ?>"></script>
 </head>
 <body data-page="forgot">
+    <a class="skip-link" href="#auth-main">Skip to recovery form</a>
     <div class="container auth-shell">
         <section class="auth-intro" aria-label="Progression Tracker recovery">
             <div class="auth-copy">
@@ -59,7 +61,7 @@
                 <p class="auth-panel-label">Recovery Console</p>
                 <p class="auth-panel-copy">Start with the account email, verify the saved recovery answers, then create a new password.</p>
             </header>
-            <main class="auth-section">
+            <main class="auth-section" id="auth-main" tabindex="-1">
                 <form action="api/auth/forgot.php" method="POST" id="forgotForm" novalidate>
                     <ol class="recovery-steps" id="recoverySteps" aria-label="Password recovery steps">
                         <li class="recovery-step is-active" data-stage="email">

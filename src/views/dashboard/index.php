@@ -62,7 +62,7 @@ include __DIR__ . '/../partials/dashboard-start.php';
                 <h2>Activity Overview</h2>
                 <p>Daily activity across goals and dreams, with progress snapshots over time.</p>
             </div>
-            <div class="history-range-switch" data-range-switch>
+            <div class="history-range-switch" data-range-switch role="group" aria-label="Activity time range">
                 <button type="button" class="range-chip" data-range="week">Week</button>
                 <button type="button" class="range-chip" data-range="month">Month</button>
                 <button type="button" class="range-chip is-active" data-range="year">Year</button>
