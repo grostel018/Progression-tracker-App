@@ -1,0 +1,131 @@
+<?php
+
+namespace src\api\dreams;
+
+use src\lib\Auth;
+use src\lib\Database;
+
+/**
+ * Dream Repository
+ * Handles database operations for dreams
+ */
+class DreamRepository
+{
+    private \PDO $db;
+
+    public function __construct()
+    {
+        $this->db = Database::getConnection();
+    }
+
+    /**
+     * Get all dreams for a user
+     */
+    public function getByUser(int $userId, array $filters = []): array
+    {
+        $query = 'SELECT * FROM dreams WHERE user_id = ?';
+        $params = [$userId];
+
+        if (!empty($filters['status'])) {
+            $query .= ' AND status = ?';
+            $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['category_id'])) {
+            $query .= ' AND category_id = ?';
+            $params[] = $filters['category_id'];
+        }
+
+        $query .= ' ORDER BY start_date DESC';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Get dream by ID
+     */
+    public function getById(int $id, int $userId): ?array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM dreams WHERE id = ? AND user_id = ?');
+        $stmt->execute([$id, $userId]);
+        return $stmt->fetch();
+    }
+
+    /**
+     * Create new dream
+     */
+    public function create(array $data): int
+    {
+        $stmt = $this->db->prepare(
+            'INSERT INTO dreams (user_id, category_id, title, description, start_date, estimated_finish_date, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([
+            $data['user_id'],
+            $data['category_id'],
+            $data['title'],
+            $data['description'] ?? null,
+            $data['start_date'] ?? date('Y-m-d'),
+            $data['estimated_finish_date'] ?? null,
+            $data['status'] ?? 'active',
+        ]);
+        return (int) $this->db->lastInsertId();
+    }
+
+    /**
+     * Update dream
+     */
+    public function update(int $id, int $userId, array $data): bool
+    {
+        $fields = [];
+        $params = [];
+
+        foreach (['category_id', 'title', 'description', 'start_date', 'estimated_finish_date', 'status'] as $field) {
+            if (isset($data[$field])) {
+                $fields[] = "$field = ?";
+                $params[] = $data[$field];
+            }
+        }
+
+        if (empty($fields)) {
+            return false;
+        }
+
+        $params[] = $id;
+        $params[] = $userId;
+
+        $stmt = $this->db->prepare("UPDATE dreams SET " . implode(', ', $fields) . " WHERE id = ? AND user_id = ?");
+        return $stmt->execute($params);
+    }
+
+    /**
+     * Delete dream
+     */
+    public function delete(int $id, int $userId): bool
+    {
+        $stmt = $this->db->prepare('DELETE FROM dreams WHERE id = ? AND user_id = ?');
+        return $stmt->execute([$id, $userId]);
+    }
+
+    /**
+     * Get dreams with goal counts
+     */
+    public function getWithStats(int $userId): array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT
+                d.id, d.title, d.status, d.start_date,
+                COUNT(g.id) as goal_count,
+                SUM(CASE WHEN g.goal_reached = 1 THEN 1 ELSE 0 END) as goals_reached
+             FROM dreams d
+             LEFT JOIN goals g ON d.id = g.dream_id
+             WHERE d.user_id = ?
+             GROUP BY d.id
+             ORDER BY d.start_date DESC'
+        );
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll();
+    }
+}

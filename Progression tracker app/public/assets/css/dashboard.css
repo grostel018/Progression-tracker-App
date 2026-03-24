@@ -1,0 +1,430 @@
+body[data-page="dashboard"],
+body[data-page="dreams"],
+body[data-page="goals"],
+body[data-page="categories"],
+body[data-page="logs"] {
+    padding: clamp(14px, 2vw, 24px);
+}
+
+.dashboard-container {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%),
+        rgba(7, 14, 10, 0.86);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    min-height: calc(100vh - clamp(28px, 4vw, 48px));
+    overflow: hidden;
+    position: relative;
+}
+
+.dashboard-container::before {
+    background: linear-gradient(90deg, transparent 0%, rgba(107, 255, 177, 0.22) 18%, transparent 36%);
+    content: "";
+    height: 1px;
+    left: 28px;
+    opacity: 0.9;
+    position: absolute;
+    right: 28px;
+    top: 18px;
+}
+
+.sidebar {
+    background: linear-gradient(180deg, rgba(6, 13, 9, 0.94), rgba(5, 11, 8, 0.98));
+    border-right: 1px solid var(--border);
+    min-width: 0;
+    padding: 28px 18px 18px;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    height: 100%;
+}
+
+.user-info {
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    gap: 0.45rem;
+    padding-bottom: 20px;
+}
+
+.user-info::before {
+    color: var(--accent);
+    content: "Progression Tracker";
+    font-size: 0.74rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.username {
+    display: block;
+    font-size: 1.3rem;
+    line-height: 1.2;
+}
+
+.nav-list {
+    display: grid;
+    gap: 0.4rem;
+    list-style: none;
+}
+
+.nav-link {
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    display: block;
+    letter-spacing: 0.06em;
+    padding: 0.8rem 0.9rem;
+    position: relative;
+    text-transform: uppercase;
+    transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.nav-link::before {
+    color: rgba(219, 255, 228, 0.22);
+    content: ">";
+    margin-right: 0.65rem;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgba(107, 255, 177, 0.08);
+    border-color: var(--border);
+    color: var(--text);
+    transform: translateX(2px);
+}
+
+.nav-bottom {
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.nav-link.logout {
+    color: #ffd4da;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+    padding: clamp(28px, 3vw, 40px);
+}
+
+.page-header {
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    padding-bottom: 18px;
+}
+
+.page-header h1 {
+    font-size: clamp(2rem, 4vw, 3.1rem);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.page-header .btn-primary,
+.add-btn {
+    min-width: 170px;
+    width: auto;
+}
+
+.stats-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stat-card,
+.panel,
+.dream-card,
+.goal-card,
+.category-card,
+.log-card,
+.empty-state {
+    background: rgba(9, 19, 13, 0.64);
+    border: 1px solid var(--border);
+    position: relative;
+}
+
+.stat-card::before,
+.panel::before,
+.dream-card::before,
+.goal-card::before,
+.category-card::before,
+.log-card::before,
+.empty-state::before {
+    background: linear-gradient(90deg, rgba(107, 255, 177, 0.45), transparent);
+    content: "";
+    height: 1px;
+    left: 18px;
+    position: absolute;
+    right: 18px;
+    top: 16px;
+}
+
+.stat-card {
+    display: grid;
+    gap: 0.6rem;
+    min-height: 150px;
+    padding: 28px 22px 22px;
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    line-height: 1;
+}
+
+.stat-unit {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.panel {
+    padding: 28px 22px 22px;
+}
+
+.panel h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.65rem;
+    text-transform: uppercase;
+}
+
+.panel p {
+    color: var(--text-muted);
+    max-width: 58ch;
+}
+
+.empty-state {
+    min-height: 240px;
+    padding: 48px 24px 24px;
+    width: 100%;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    max-width: 40ch;
+}
+
+.dreams-grid,
+.goals-list,
+.categories-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.logs-list {
+    display: grid;
+    gap: 18px;
+}
+
+.dream-card,
+.goal-card,
+.category-card,
+.log-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+    padding: 28px 22px 22px;
+    transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
+}
+
+.dream-card:hover,
+.goal-card:hover,
+.category-card:hover,
+.log-card:hover {
+    background: rgba(11, 24, 16, 0.78);
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+}
+
+.dream-header,
+.goal-header,
+.log-header {
+    align-items: flex-start;
+    display: flex;
+    gap: 0.8rem;
+    justify-content: space-between;
+}
+
+.dream-header h3,
+.goal-header h3,
+.category-card h3 {
+    font-size: 1.2rem;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.status-badge {
+    border: 1px solid var(--border);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    padding: 0.32rem 0.55rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-active {
+    background: rgba(72, 218, 137, 0.12);
+    color: var(--success);
+}
+
+.status-paused {
+    background: rgba(255, 214, 109, 0.1);
+    border-color: rgba(255, 214, 109, 0.32);
+    color: #ffd66d;
+}
+
+.status-completed {
+    background: rgba(111, 234, 255, 0.1);
+    border-color: rgba(111, 234, 255, 0.32);
+    color: #8cefff;
+}
+
+.status-abandoned,
+.status-failed {
+    background: rgba(255, 125, 144, 0.1);
+    border-color: rgba(255, 125, 144, 0.32);
+    color: var(--danger);
+}
+
+.dream-description,
+.goal-description,
+.category-meta,
+.goal-dream,
+.log-target,
+.log-time,
+.meta-item {
+    color: var(--text-muted);
+}
+
+.dream-meta,
+.goal-meta,
+.goal-info,
+.dream-actions,
+.goal-actions,
+.category-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+}
+
+.goal-info {
+    justify-content: flex-end;
+}
+
+.goal-type {
+    color: rgba(219, 255, 228, 0.42);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.btn-action {
+    align-self: flex-start;
+    padding: 0.75rem 0.9rem;
+}
+
+.progress-bar-container {
+    background: rgba(255, 255, 255, 0.06);
+    height: 6px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, rgba(107, 255, 177, 0.6), rgba(107, 255, 177, 1));
+    height: 100%;
+    transition: width 220ms ease;
+}
+
+.log-action {
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.log-details {
+    background: rgba(3, 10, 6, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    overflow-x: auto;
+    padding: 14px;
+    white-space: pre-wrap;
+}
+
+@media (max-width: 960px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .nav-list {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    body[data-page="dashboard"],
+    body[data-page="dreams"],
+    body[data-page="goals"],
+    body[data-page="categories"],
+    body[data-page="logs"] {
+        padding: 10px;
+    }
+
+    .dashboard-container::before {
+        left: 16px;
+        right: 16px;
+    }
+
+    .sidebar,
+    .main-content {
+        padding: 18px 16px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .page-header .btn-primary,
+    .add-btn {
+        width: 100%;
+    }
+
+    .nav-list {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dream-header,
+    .goal-header,
+    .log-header {
+        flex-direction: column;
+    }
+
+    .goal-info {
+        justify-content: flex-start;
+    }
+}
