@@ -4,35 +4,39 @@ Project-local Codex memory for faster, safer development.
 
 ## Purpose
 
-Use this folder as the first stop before making changes. It captures the current repo shape, known hazards, and a lightweight log of important work so future sessions do not have to rediscover the same constraints.
+Use this folder as the first stop before making changes. It captures the active app layer, schema reality, and workflow constraints so future sessions do not have to rediscover them.
 
 ## Working Rules
 
-- Treat `public/` as the active entry layer unless the task is explicitly about the newer `src/` architecture.
-- Treat `src/` as an in-progress refactor, not a fully wired application.
-- Treat `home/` as legacy or duplicate UI/backend code unless the user asks to keep it in sync.
-- Keep the terminal-style visual language unless the task is explicitly a redesign.
-- Check `DB/database.sql` before trusting model/controller assumptions about available columns.
-- Prefer root `config/` as the intended configuration source.
+- Treat `src/` as the authoritative implementation layer for business logic, views, helpers, repositories, and source assets.
+- Treat `public/` as the HTTP entry layer only. Most files there now just bootstrap and dispatch into `src/`.
+- Treat `src/assets/` as the frontend source of truth. `public/assets/` is the served copy and must be synced after edits.
+- Treat `home/`, `legacy/`, `public/*.html`, and `.codex/original-repo/` as legacy or reference-only unless the user explicitly asks to touch them.
+- Check `DB/database.sql` before changing queries or assumptions about columns and tables.
+- Use `DB/migrations/20260324_progress_history_analytics.sql` only when reasoning about upgrading an older database; the main schema already includes those tables.
 - Update `.codex/memory/*.md` when architecture, schema, or workflow assumptions change.
 - Append notable task outcomes to `.codex/logbook.md` when a change affects future work.
 
 ## Fast Orientation
 
-- Public login page: `public/index.php`
-- Public auth endpoint: `public/login.php`
-- Main dashboard entry: `public/dashboard.php`
-- Shared config: `config/app.php`, `config/database.php`
+- Public root redirect: `public/index.php`
+- Auth pages: `public/login.php`, `public/register.php`, `public/forgot.php`
+- Dashboard pages: `public/dashboard.php`, `public/dreams.php`, `public/goals.php`, `public/categories.php`, `public/logs.php`
+- Shared bootstrap: `src/bootstrap.php`
+- Shared helpers/auth/db: `src/lib/helpers.php`, `src/lib/Auth.php`, `src/lib/Database.php`
+- Source views: `src/views/`
+- Source assets: `src/assets/`
+- Served assets: `public/assets/`
 - Database schema: `DB/database.sql`
-- Newer namespaced layer: `src/api`, `src/lib`, `src/views`
-- Existing Claude memory: `.claude/`
+- Asset sync script: `scripts/sync-assets.php`
 
 ## Current Repo Reality
 
-- No Composer setup or visible autoloader was found.
-- No test runner or project scripts were found.
-- The repo is not currently a Git working tree in this folder.
-- Documentation in `README.md` and `.claude/` is useful, but some details are stale against the current code.
+- This folder is a Git working tree.
+- There is no Composer setup, package manager manifest, or automated test runner in the repo.
+- The app is a server-rendered PHP application with JS-enhanced interactions, not a SPA.
+- `src/bootstrap.php` provides the autoloader and wires root `config/` correctly.
+- The app now includes history/progress analytics, goal tasks, goal habits, and security-question-based password reset flows.
 
 Read these next:
 

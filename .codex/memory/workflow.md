@@ -2,34 +2,61 @@
 
 ## Local Development Assumptions
 
-- Intended stack: PHP + MySQL, likely under XAMPP/Apache.
-- `README.md` points to an Apache/XAMPP setup.
-- `config/app.php` defaults `app_url` to `http://localhost:8000`, so some work may also target PHP's built-in server.
+- Intended stack: PHP + MySQL, typically under XAMPP/Apache.
+- Current workspace path is under `C:\xampp\htdocs\...`, so Apache/XAMPP is the most likely runtime.
+- `config/app.php` still defaults `app_url` to `http://localhost:8000`, which is useful for PHP built-in-server work but not proof of the primary runtime.
 
 ## Practical Start Points
 
-- Database import: `DB/database.sql`
+- Schema import / reset: `DB/database.sql`
 - App config: `config/app.php`
 - DB config: `config/database.php`
-- Public entry page: `public/index.php`
+- Public entry: `public/index.php`
+- Shared bootstrap: `src/bootstrap.php`
+- Shared dashboard shell: `src/views/partials/dashboard-start.php`
+
+## Authoritative Edit Targets
+
+- Business logic and data access: `src/api/*`, `src/lib/*`
+- Page markup: `src/views/*`
+- Frontend source: `src/assets/*`
+- Served frontend output: `public/assets/*` only after syncing
+- HTTP route wiring: `public/*.php`, `public/api/*.php`
+
+Do not start in `home/`, `legacy/`, or `public/*.html` unless the user explicitly asks for those areas.
+
+## Asset Workflow
+
+- Edit files in `src/assets/`.
+- Sync to `public/assets/` with:
+  - `C:\xampp\php\php.exe scripts/sync-assets.php`
+- Avoid treating `public/assets/` as the source of truth because it can drift or be overwritten by sync.
 
 ## Verification Strategy
 
-No automated test suite or package scripts were found, so default to targeted manual checks:
+There is no automated test suite in the repo, so default to targeted verification:
 
-- auth flow: login, register, logout
-- session-protected navigation: dashboard and child pages
-- CRUD flows: categories, dreams, goals, logs
-- DB-backed changes: verify against actual schema, not only PHP assumptions
+- `php -l` on touched PHP files
+- run the asset sync script after frontend asset edits
+- manual auth checks: login, register, logout, forgot password
+- manual CRUD checks: categories, dreams, goals
+- manual history checks: dashboard history, goal history, dream history, manual log creation, task completion, habit action logging
 
 ## Debugging Notes
 
-- PHP errors are likely easiest to inspect through Apache/XAMPP logs if running under XAMPP.
-- Existing debugging guidance in `.claude/memory/debugging.md` is still useful for environment-level checks.
-- If a change touches `src/`, verify that required files are loaded explicitly because no autoloader was found.
+- API endpoints consistently return JSON through helper functions in `src/lib/helpers.php`.
+- A `401` from frontend fetch calls usually redirects the browser to `login.php` via `src/assets/js/app.js`.
+- If a page looks stale after a frontend change, check whether `src/assets/` was synced to `public/assets/`.
+- If auth/session behavior is inconsistent, inspect `var/sessions/` permissions and the session cookie config in `config/app.php`.
 
-## Change Discipline
+## Default Mental Model
 
-- Before editing, identify which layer is authoritative for the task: `public/`, `src/`, or `home/`.
-- When fixing a bug in the live app, do not automatically mirror the change into `src/` and `home/`.
-- When making structural fixes, record the decision in `.codex/logbook.md`.
+When debugging or implementing a feature, trace in this order:
+
+1. `public/*.php` or `public/api/*.php`
+2. `src/bootstrap.php` / helpers / auth
+3. `src/api/*` controller or handler
+4. repository/database interactions
+5. `src/views/*`
+6. `src/assets/*`
+7. synced `public/assets/*`

@@ -1,53 +1,59 @@
 # Known Issues
 
-These are current repo-level hazards that should be checked before deep work.
+These are the repo-level hazards most likely to waste time in future sessions.
 
-## Configuration Loading Bug
+## Asset Sync Drift
 
-`src/lib/helpers.php` loads config from `__DIR__ . '/../config/'`.
-
-Given the actual repo layout, that resolves to `src/config/`, but the config files live in root `config/`.
+`src/assets/` is the source, but browsers load `public/assets/`.
 
 Impact:
 
-- `config('database')` and `config('app')` can silently fail in the `src/` layer.
+- Editing only `public/assets/` is fragile.
+- Editing only `src/assets/` without syncing can make it look like changes did not work.
 
-## Auth Schema Mismatch
+## Legacy Duplicate Areas
 
-`src/lib/Auth.php` reads or writes `users.last_login`, but `DB/database.sql` does not create that column.
+The repo still contains old or reference-only copies:
 
-Impact:
-
-- login and registration logic in the refactor layer can fail against a clean database.
-
-## Incomplete `src/` Bootstrapping
-
-The newer view/controller layer is not fully wired:
-
-- `src/views/dashboard/index.php` uses `Database::getConnection()` without visibly requiring `Database.php`
-- the same file links to asset paths that are unlikely to resolve if served directly
-- logout links in `src/views/*` do not match the handler files present in `src/api/auth/`
-
-Impact:
-
-- direct use of `src/views/*` is likely broken without additional bootstrap work
-
-## Parallel App Copies
-
-There are at least three application areas:
-
-- `public/`
-- `src/`
 - `home/`
+- `legacy/`
+- `public/login.html`, `public/register.html`, `public/forgot.html`
+- `.codex/original-repo/`
 
 Impact:
 
-- features and fixes can diverge unless the active layer is chosen intentionally
+- Easy to patch the wrong file set if the active layer is not chosen deliberately.
 
-## Stale Reference Material
+## Password Reset Is Session-Scoped
 
-`README.md` and `.claude/` describe the project helpfully, but parts of them no longer match the exact repo state.
+The forgot-password flow verifies security answers, then stores the reset token and expiry in PHP session state instead of a database-backed token table.
 
 Impact:
 
-- use them as orientation, then verify against actual files before changing behavior
+- Recovery only continues in the same browser session.
+- There is no email token or cross-device reset flow.
+
+## Existing Accounts May Lack Recovery Data
+
+The schema supports security questions, and new registration can save answers, but older accounts may not have rows in `user_security_answers`.
+
+Impact:
+
+- Forgot-password can fail for existing users even when the code path is correct.
+
+## SQL `sessions` Table Is Not The Runtime Session Store
+
+The schema still has a `sessions` table, but current auth uses native PHP sessions stored under `var/sessions/`.
+
+Impact:
+
+- It is easy to assume session bugs are DB-related when the active storage is filesystem-based.
+
+## No Automated Tests Or Dependency Tooling
+
+No Composer manifest, package manifest, or test runner config is present.
+
+Impact:
+
+- Verification is manual and file-targeted.
+- Large refactors need extra care because there is no safety net beyond linting/manual checks.

@@ -1,4 +1,6 @@
 (function () {
+    let resizeBound = false;
+
     function getApp() {
         return window.dashboardApp;
     }
@@ -131,6 +133,7 @@
         }
 
         panel.dataset.activeRange = data.range_key;
+        panel.__historyOverview = data;
         renderOverview(panel, data);
     }
 
@@ -173,8 +176,54 @@
 
     function updateRangeSwitch(panel, activeRange) {
         panel.querySelectorAll('[data-range-switch] .range-chip').forEach((button) => {
-            button.classList.toggle('is-active', button.dataset.range === activeRange);
+            const isActive = button.dataset.range === activeRange;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
         });
+    }
+
+    function getCalendarLayout(rangeKey, weekCount, containerWidth) {
+        const configs = {
+            year: { maxCell: 10, minCell: 6, gap: 3, weekdayWidth: 28 },
+            month: { maxCell: 16, minCell: 9, gap: 4, weekdayWidth: 34 },
+            '30d': { maxCell: 16, minCell: 9, gap: 4, weekdayWidth: 34 },
+        };
+
+        const config = configs[rangeKey] || configs.month;
+        const width = Math.max(containerWidth || 0, 240);
+        const gapsWidth = Math.max(weekCount - 1, 0) * config.gap;
+        const availableWidth = Math.max(width - config.weekdayWidth - gapsWidth, weekCount);
+        const fittedCellSize = Math.floor(availableWidth / Math.max(weekCount, 1));
+        const cellSize = Math.min(config.maxCell, Math.max(config.minCell, fittedCellSize));
+        const contentWidth = (weekCount * cellSize) + gapsWidth;
+
+        return {
+            cellSize,
+            contentWidth,
+            gap: config.gap,
+            weekdayWidth: config.weekdayWidth,
+        };
+    }
+
+    function buildMonthMarkers(cells, layout) {
+        const labelWidth = 28;
+        const minGap = 6;
+        let lastEnd = -Infinity;
+
+        return cells
+            .filter((cell, index) => cell.day_of_month === '1' || index === 0)
+            .map((cell) => {
+                const weekIndex = Number(cell.week_index);
+                const idealLeft = weekIndex * (layout.cellSize + layout.gap);
+                const maxLeft = Math.max(layout.contentWidth - labelWidth, 0);
+                const left = Math.max(0, Math.min(maxLeft, Math.max(idealLeft, lastEnd + minGap)));
+                lastEnd = left + labelWidth;
+
+                return {
+                    label: cell.month_label,
+                    left,
+                };
+            });
     }
 
     function renderDashboardSummaries(panel, data) {
@@ -280,8 +329,9 @@
         }
 
         const weekCount = Math.max(...cells.map((cell) => Number(cell.week_index)), 0) + 1;
-        const monthMarkers = cells.filter((cell, index) => cell.day_of_month === '1' || index === 0)
-            .map((cell) => `<span style="grid-column:${Number(cell.week_index) + 1}">${escapeHtml(cell.month_label)}</span>`)
+        const layout = getCalendarLayout(rangeKey, weekCount, container.clientWidth);
+        const monthMarkers = buildMonthMarkers(cells, layout)
+            .map((marker) => `<span class="heatmap-month-marker" style="position:absolute; left:${marker.left}px; top:0;">${escapeHtml(marker.label)}</span>`)
             .join('');
         const weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
             .map((label) => `<span>${label}</span>`)
@@ -294,11 +344,18 @@
 
         container.innerHTML = `
             ${summary}
-            <div class="heatmap-calendar-shell">
-                <div class="heatmap-month-markers" style="grid-template-columns: repeat(${weekCount}, minmax(0, 1fr));">${monthMarkers}</div>
+            <div
+                class="heatmap-calendar-shell"
+                data-range="${escapeHtml(rangeKey)}"
+                style="--heatmap-cell-size:${layout.cellSize}px; --heatmap-gap:${layout.gap}px; --heatmap-weekday-width:${layout.weekdayWidth}px; --heatmap-content-width:${layout.contentWidth}px;"
+            >
+                <div class="heatmap-month-row">
+                    <div class="heatmap-month-spacer" aria-hidden="true"></div>
+                    <div class="heatmap-month-markers">${monthMarkers}</div>
+                </div>
                 <div class="heatmap-frame-grid">
                     <div class="heatmap-weekday-labels">${weekdayLabels}</div>
-                    <div class="heatmap-grid" style="grid-template-columns: repeat(${weekCount}, minmax(12px, 1fr));">${buttons}</div>
+                    <div class="heatmap-grid" style="grid-template-columns: repeat(${weekCount}, var(--heatmap-cell-size));">${buttons}</div>
                 </div>
             </div>
             ${buildLegend()}
@@ -564,6 +621,37 @@
         });
     }
 
+    function bindWindowResize() {
+        if (resizeBound) {
+            return;
+        }
+
+        resizeBound = true;
+        let frame = 0;
+
+        window.addEventListener('resize', () => {
+            window.cancelAnimationFrame(frame);
+            frame = window.requestAnimationFrame(() => {
+                document.querySelectorAll('[data-history-bound="true"]').forEach((panel) => {
+                    if (panel.__historyOverview) {
+                        renderOverview(panel, panel.__historyOverview);
+                    }
+                });
+            });
+        });
+    }
+
+    function ensurePanelReady(panel) {
+        if (!panel) {
+            return false;
+        }
+
+        bindPanel(panel);
+        bindModal();
+        bindWindowResize();
+        return true;
+    }
+
     function bindModal() {
         const { root, body } = getModalElements();
         if (!root || root.dataset.bound === 'true') {
@@ -583,10 +671,9 @@
 
     function initPanelSet(selector) {
         document.querySelectorAll(selector).forEach((panel) => {
-            bindPanel(panel);
+            ensurePanelReady(panel);
             loadPanel(panel);
         });
-        bindModal();
     }
 
     window.ProgressionHistory = {
@@ -597,10 +684,13 @@
             initPanelSet(selector);
         },
         refreshPanel(panel) {
+            if (!ensurePanelReady(panel)) {
+                return Promise.resolve();
+            }
             return loadPanel(panel);
         },
         setEntity(panel, entityId) {
-            if (!panel) {
+            if (!ensurePanelReady(panel)) {
                 return;
             }
 

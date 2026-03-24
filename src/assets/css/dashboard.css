@@ -736,7 +736,8 @@ body[data-page="logs"] {
 
 .analytics-grid,
 .entity-history-grid {
-    grid-template-columns: 1.2fr 0.9fr;
+    align-items: start;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
 }
 
 .analytics-summary-grid {
@@ -754,7 +755,10 @@ body[data-page="logs"] {
         linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 22%),
         rgba(4, 10, 7, 0.86);
     border: 1px solid rgba(255, 255, 255, 0.04);
+    contain: layout paint;
+    isolation: isolate;
     min-width: 0;
+    overflow: hidden;
     padding: 22px 18px 18px;
 }
 
@@ -866,43 +870,89 @@ body[data-page="logs"] {
     color: var(--text-muted);
     display: flex;
     font-size: 0.82rem;
+    gap: 0.75rem;
     justify-content: space-between;
     margin-bottom: 14px;
+}
+
+.heatmap-mount,
+.chart-mount {
+    min-width: 0;
 }
 
 .heatmap-calendar-shell {
     display: grid;
     gap: 10px;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.heatmap-month-row {
+    align-items: end;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: var(--heatmap-weekday-width, 40px) minmax(0, 1fr);
+    min-width: 0;
+}
+
+.heatmap-month-spacer {
+    min-width: 0;
 }
 
 .heatmap-month-markers {
     color: rgba(214, 255, 229, 0.48);
-    display: grid;
+    display: block;
     font-size: 0.72rem;
-    gap: 6px;
     letter-spacing: 0.08em;
+    max-width: 100%;
+    min-height: 0.9rem;
+    overflow: hidden;
+    position: relative;
     text-transform: uppercase;
+    width: min(100%, var(--heatmap-content-width, 100%));
+}
+
+.heatmap-month-marker {
+    background: linear-gradient(90deg, rgba(4, 10, 7, 0.98), rgba(4, 10, 7, 0.82) 72%, transparent);
+    display: block;
+    left: 0;
+    line-height: 1;
+    min-width: 28px;
+    padding-right: 6px;
+    position: absolute;
+    top: 0;
+    white-space: nowrap;
 }
 
 .heatmap-frame-grid {
+    align-items: start;
     display: grid;
     gap: 10px;
-    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-columns: var(--heatmap-weekday-width, 40px) minmax(0, 1fr);
+    min-width: 0;
+    overflow: hidden;
 }
 
 .heatmap-weekday-labels {
+    align-items: center;
     color: rgba(214, 255, 229, 0.42);
     display: grid;
     font-size: 0.72rem;
-    gap: 6px;
-    grid-template-rows: repeat(7, 1fr);
+    gap: var(--heatmap-gap, 6px);
+    grid-template-rows: repeat(7, var(--heatmap-cell-size, 14px));
 }
 
 .heatmap-grid {
     display: grid;
-    gap: 6px;
+    gap: var(--heatmap-gap, 6px);
     grid-auto-flow: column;
-    grid-template-rows: repeat(7, minmax(14px, 1fr));
+    grid-template-rows: repeat(7, var(--heatmap-cell-size, 14px));
+    justify-content: start;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    width: min(100%, var(--heatmap-content-width, 100%));
 }
 
 .heatmap-day,
@@ -914,8 +964,9 @@ body[data-page="logs"] {
 .heatmap-day {
     aspect-ratio: 1 / 1;
     cursor: pointer;
-    min-height: 14px;
+    height: var(--heatmap-cell-size, 14px);
     transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    width: var(--heatmap-cell-size, 14px);
 }
 
 .heatmap-day:hover,
@@ -1021,12 +1072,33 @@ body[data-page="logs"] {
 .history-chart-shell {
     display: grid;
     gap: 8px;
+    min-width: 0;
 }
 
 .history-chart {
     display: block;
     height: auto;
+    max-width: 100%;
     width: 100%;
+}
+
+.heatmap-calendar-shell[data-range="year"] {
+    gap: 8px;
+}
+
+.heatmap-calendar-shell[data-range="year"] .heatmap-month-markers,
+.heatmap-calendar-shell[data-range="year"] .heatmap-weekday-labels {
+    font-size: 0.64rem;
+}
+
+.heatmap-calendar-shell[data-range="month"],
+.heatmap-calendar-shell[data-range="30d"] {
+    gap: 8px;
+}
+
+.heatmap-calendar-shell[data-range="month"] .heatmap-month-markers,
+.heatmap-calendar-shell[data-range="30d"] .heatmap-month-markers {
+    font-size: 0.68rem;
 }
 
 .history-chart-axis line {
@@ -1503,7 +1575,7 @@ body[data-page="logs"] {
     }
 
     .heatmap-frame-grid {
-        grid-template-columns: 30px minmax(0, 1fr);
+        grid-template-columns: minmax(24px, var(--heatmap-weekday-width, 30px)) minmax(0, 1fr);
     }
 
     .heatmap-grid {

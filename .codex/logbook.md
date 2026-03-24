@@ -13,6 +13,13 @@ Use this file as a short running history of decisions and meaningful changes tha
 
 ## Entries
 
+### 2026-03-24
+
+- Task: audited the current project state and refreshed the project-local `.codex` memory so future sessions start from the live architecture instead of stale assumptions
+- Files touched: `.codex/CODEX.md`, `.codex/memory/architecture.md`, `.codex/memory/database.md`, `.codex/memory/workflow.md`, `.codex/memory/known-issues.md`, `.codex/logbook.md`
+- Verification: compared `.codex` notes against current `public/`, `src/`, `config/`, `DB/`, `scripts/`, and Git state
+- Follow-up: if the app starts using Composer, tests, DB-backed reset tokens, or a different active app layer, update `.codex` memory immediately
+
 ### 2026-03-22
 
 - Task: continued the refactor by wiring goal progress logging, activity logging, and post-registration security question persistence
