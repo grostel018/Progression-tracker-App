@@ -356,7 +356,7 @@ The application uses **PDO** for database access.
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/grostel018/Progression-tracker-App.git
 cd <your-project-folder>
 ```
 
