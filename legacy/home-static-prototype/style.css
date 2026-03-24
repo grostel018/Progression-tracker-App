@@ -1,0 +1,168 @@
+/* Fix Chrome autofill white background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px black inset !important;
+    box-shadow: 0 0 0 1000px black inset !important;
+    -webkit-text-fill-color: #00ff00 !important;
+    caret-color: #00ff00;
+}
+
+input {
+    caret-color: #00ff00;
+}
+
+
+
+
+
+/* 1) Reset everything */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Courier New", monospace;
+}
+
+/* 2) Ultra-dark terminal background */
+body {
+    background: #000000; /* pure black */
+    color: #00ff00; /* classic terminal green */
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 3) Terminal login box */
+.container {
+    background: #000000;
+    border: 2px solid #00ff00;
+    padding: 25px 30px;
+    width: 100%;
+    max-width: 420px;
+}
+
+/* 4) Center headings */
+header, main, footer {
+    text-align: center;
+}
+
+/* 5) Input groups */
+.inputs {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+/* 6) Terminal inputs */
+input {
+    width: 100%;
+    padding: 8px;
+    background: #000000;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    font-family: "Courier New", monospace;
+}
+
+/* Remove blue glow on focus */
+input:focus {
+    outline: none;
+    box-shadow: 0 0 5px #00ff00;
+}
+
+/* 7) Remember + Forgot layout */
+.form-options {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+}
+
+/* 8) Terminal button */
+.btn-primary {
+    width: 100%;
+    padding: 8px;
+    background: #000000;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+}
+
+.btn-primary:hover {
+    background: #00ff00;
+    color: #000000;
+}
+
+/* 9) Links */
+a {
+    color: #00ff00;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 10) Footer small terminal text */
+footer {
+    margin-top: 10px;
+    font-size: 0.7rem;
+    opacity: 0.6;
+}
+
+
+
+.terminal-checkbox {
+    align-items: center;
+    color: #00ff00;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 6px;
+    line-height: 1.2;
+    position: relative;
+    user-select: none;
+}
+
+.terminal-checkbox input {
+    appearance: none;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+.checkmark {
+    color: inherit;
+    display: inline-block;
+    flex: 0 0 auto;
+    font-variant-ligatures: none;
+    line-height: 1;
+    min-width: 3ch;
+}
+
+.checkmark::before {
+    content: "[ ]";
+    display: block;
+    white-space: pre;
+}
+
+.terminal-checkbox input:focus-visible + .checkmark {
+    outline: 1px solid rgba(0, 255, 0, 0.65);
+    outline-offset: 2px;
+}
+
+.terminal-checkbox input:checked + .checkmark::before {
+    content: "[x]";
+}
+

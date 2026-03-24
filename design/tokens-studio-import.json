@@ -1,0 +1,113 @@
+{
+  "global": {
+    "color": {
+      "canvas": {
+        "base": { "value": "#07110B", "type": "color" },
+        "deep": { "value": "#020503", "type": "color" },
+        "edge": { "value": "#040806", "type": "color" }
+      },
+      "surface": {
+        "elevated": { "value": "rgba(8, 19, 13, 0.92)", "type": "color" },
+        "panel": { "value": "rgba(8, 18, 12, 0.88)", "type": "color" },
+        "soft": { "value": "rgba(9, 19, 13, 0.64)", "type": "color" },
+        "field": { "value": "rgba(7, 15, 11, 0.92)", "type": "color" }
+      },
+      "border": {
+        "default": { "value": "rgba(101, 255, 166, 0.16)", "type": "color" },
+        "strong": { "value": "rgba(101, 255, 166, 0.34)", "type": "color" },
+        "subtle": { "value": "rgba(255, 255, 255, 0.04)", "type": "color" }
+      },
+      "text": {
+        "primary": { "value": "#ECFFF1", "type": "color" },
+        "muted": { "value": "rgba(211, 247, 221, 0.68)", "type": "color" },
+        "soft": { "value": "rgba(219, 255, 228, 0.42)", "type": "color" },
+        "placeholder": { "value": "rgba(219, 255, 228, 0.30)", "type": "color" }
+      },
+      "accent": {
+        "base": { "value": "#6BFFB1", "type": "color" },
+        "strong": { "value": "#BBFFD5", "type": "color" },
+        "wash": { "value": "rgba(107, 255, 177, 0.08)", "type": "color" },
+        "line": { "value": "rgba(107, 255, 177, 0.45)", "type": "color" }
+      },
+      "state": {
+        "success": { "value": "#8DFFB8", "type": "color" },
+        "successWash": { "value": "rgba(72, 218, 137, 0.12)", "type": "color" },
+        "warning": { "value": "#FFD66D", "type": "color" },
+        "warningWash": { "value": "rgba(255, 214, 109, 0.10)", "type": "color" },
+        "info": { "value": "#8CEFFF", "type": "color" },
+        "infoWash": { "value": "rgba(111, 234, 255, 0.10)", "type": "color" },
+        "danger": { "value": "#FF7D90", "type": "color" },
+        "dangerWash": { "value": "rgba(255, 125, 144, 0.10)", "type": "color" }
+      }
+    },
+    "spacing": {
+      "4": { "value": "4", "type": "spacing" },
+      "8": { "value": "8", "type": "spacing" },
+      "12": { "value": "12", "type": "spacing" },
+      "16": { "value": "16", "type": "spacing" },
+      "20": { "value": "20", "type": "spacing" },
+      "24": { "value": "24", "type": "spacing" },
+      "32": { "value": "32", "type": "spacing" },
+      "40": { "value": "40", "type": "spacing" },
+      "48": { "value": "48", "type": "spacing" },
+      "64": { "value": "64", "type": "spacing" },
+      "72": { "value": "72", "type": "spacing" },
+      "96": { "value": "96", "type": "spacing" }
+    },
+    "sizing": {
+      "sidebarWidth": { "value": "270", "type": "sizing" },
+      "buttonHeightPrimary": { "value": "48", "type": "sizing" },
+      "buttonHeightSecondary": { "value": "40", "type": "sizing" },
+      "inputHeight": { "value": "52", "type": "sizing" },
+      "badgeHeight": { "value": "24", "type": "sizing" },
+      "statMinHeight": { "value": "150", "type": "sizing" },
+      "progressHeight": { "value": "6", "type": "sizing" },
+      "authPanelWidthMin": { "value": "360", "type": "sizing" },
+      "authPanelWidthMax": { "value": "430", "type": "sizing" },
+      "modalDreamWidth": { "value": "560", "type": "sizing" },
+      "modalGoalWidth": { "value": "620", "type": "sizing" },
+      "radiusNone": { "value": "0", "type": "borderRadius" }
+    },
+    "fontFamilies": {
+      "ui": { "value": "Consolas", "type": "fontFamilies" }
+    },
+    "fontSizes": {
+      "displayXL": { "value": "86", "type": "fontSizes" },
+      "displayL": { "value": "54", "type": "fontSizes" },
+      "headingL": { "value": "44", "type": "fontSizes" },
+      "headingM": { "value": "32", "type": "fontSizes" },
+      "headingS": { "value": "20", "type": "fontSizes" },
+      "bodyM": { "value": "16", "type": "fontSizes" },
+      "bodyS": { "value": "14", "type": "fontSizes" },
+      "label": { "value": "12", "type": "fontSizes" },
+      "micro": { "value": "11", "type": "fontSizes" }
+    },
+    "lineHeights": {
+      "displayXL": { "value": "80", "type": "lineHeights" },
+      "displayL": { "value": "50", "type": "lineHeights" },
+      "headingL": { "value": "42", "type": "lineHeights" },
+      "headingM": { "value": "32", "type": "lineHeights" },
+      "headingS": { "value": "24", "type": "lineHeights" },
+      "bodyM": { "value": "24", "type": "lineHeights" },
+      "bodyS": { "value": "20", "type": "lineHeights" },
+      "label": { "value": "16", "type": "lineHeights" },
+      "micro": { "value": "14", "type": "lineHeights" }
+    },
+    "letterSpacing": {
+      "displayXL": { "value": "-4%", "type": "letterSpacing" },
+      "displayL": { "value": "-4%", "type": "letterSpacing" },
+      "headingL": { "value": "-4%", "type": "letterSpacing" },
+      "headingM": { "value": "-3%", "type": "letterSpacing" },
+      "headingS": { "value": "-1%", "type": "letterSpacing" },
+      "bodyM": { "value": "0%", "type": "letterSpacing" },
+      "bodyS": { "value": "0%", "type": "letterSpacing" },
+      "label": { "value": "16%", "type": "letterSpacing" },
+      "micro": { "value": "12%", "type": "letterSpacing" }
+    },
+    "duration": {
+      "authEnterMs": { "value": "300", "type": "duration" },
+      "modalFadeMs": { "value": "200", "type": "duration" },
+      "progressEnterMs": { "value": "220", "type": "duration" }
+    }
+  }
+}

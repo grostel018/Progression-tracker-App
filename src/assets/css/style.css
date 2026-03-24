@@ -1,0 +1,3 @@
+/* Main CSS - Include both auth and dashboard styles */
+@import url('auth.css');
+@import url('dashboard.css');
