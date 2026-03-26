@@ -52,6 +52,17 @@ class HistoryController
         }
     }
 
+    public function weeklyReview(): array
+    {
+        $this->auth->requireAuth();
+
+        try {
+            return $this->service->getWeeklyReview($this->auth->id());
+        } catch (InvalidArgumentException $exception) {
+            return ['success' => false, 'message' => $exception->getMessage()];
+        }
+    }
+
     public function create(array $input): array
     {
         $this->auth->requireAuth();
@@ -63,3 +74,4 @@ class HistoryController
         }
     }
 }
+

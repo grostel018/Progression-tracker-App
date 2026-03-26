@@ -135,6 +135,7 @@ class GoalTrackingService
     public function listHabits(int $userId, int $goalId): array
     {
         $this->requireGoal($userId, $goalId);
+        $todayDate = $this->normalizeDate('now');
 
         return array_map(static function (array $habit): array {
             $habit['id'] = (int) $habit['id'];
@@ -143,7 +144,7 @@ class GoalTrackingService
             $habit['today_actions'] = (int) $habit['today_actions'];
             $habit['total_actions'] = (int) $habit['total_actions'];
             return $habit;
-        }, $this->habitRepository->listByGoal($userId, $goalId));
+        }, $this->habitRepository->listByGoal($userId, $goalId, $todayDate));
     }
 
     public function createHabit(int $userId, int $goalId, array $data): array

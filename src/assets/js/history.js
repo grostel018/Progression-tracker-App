@@ -16,7 +16,7 @@
     }
 
     function todayIso() {
-        return new Date().toISOString().split('T')[0];
+        return getApp()?.todayIso?.() || new Date().toISOString().split('T')[0];
     }
 
     function escapeHtml(value) {
@@ -126,13 +126,30 @@
             return;
         }
 
-        if (getPanelScope(panel) !== 'dashboard' && !getPanelEntityId(panel)) {
+        const scope = getPanelScope(panel);
+        const entityId = getPanelEntityId(panel);
+
+        if (scope !== 'dashboard' && !entityId) {
             renderIdlePanel(panel);
             return;
         }
 
         const nextRange = range || panel.dataset.activeRange || panel.dataset.defaultRange || '30d';
+        const requestId = (Number(panel.dataset.historyRequestId || '0') + 1);
+        panel.dataset.historyRequestId = String(requestId);
+
         const data = await app.apiRequest(buildOverviewUrl(panel, nextRange));
+
+        const currentScope = getPanelScope(panel);
+        const currentEntityId = getPanelEntityId(panel);
+        const currentRequestId = Number(panel.dataset.historyRequestId || '0');
+        const requestIsStale = currentRequestId !== requestId
+            || currentScope !== scope
+            || (scope !== 'dashboard' && currentEntityId !== entityId);
+
+        if (requestIsStale) {
+            return;
+        }
 
         if (!data || data.success === false) {
             app.showPageMessage(data?.message || 'Failed to load activity history.');
@@ -190,37 +207,62 @@
     }
 
     function getCalendarLayout(rangeKey, weekCount, containerWidth) {
-        const configs = {
-            year: { maxCell: 10, minCell: 6, gap: 3, weekdayWidth: 28 },
-            month: { maxCell: 16, minCell: 9, gap: 4, weekdayWidth: 34 },
-            '30d': { maxCell: 16, minCell: 9, gap: 4, weekdayWidth: 34 },
+        const width = Math.max(containerWidth || 0, 240);
+        const layoutsByRange = {
+            year: [
+                { maxCell: 10, minCell: 6, gap: 3, weekdayWidth: 28, markerWidth: 28 },
+                { maxCell: 8, minCell: 5, gap: 2, weekdayWidth: 22, markerWidth: 22 },
+                { maxCell: 6, minCell: 3, gap: 1, weekdayWidth: 16, markerWidth: 18 },
+            ],
+            month: [
+                { maxCell: 16, minCell: 9, gap: 4, weekdayWidth: 34, markerWidth: 28 },
+                { maxCell: 14, minCell: 8, gap: 3, weekdayWidth: 28, markerWidth: 24 },
+                { maxCell: 12, minCell: 6, gap: 2, weekdayWidth: 24, markerWidth: 20 },
+            ],
+            '30d': [
+                { maxCell: 16, minCell: 9, gap: 4, weekdayWidth: 34, markerWidth: 28 },
+                { maxCell: 14, minCell: 8, gap: 3, weekdayWidth: 28, markerWidth: 24 },
+                { maxCell: 12, minCell: 6, gap: 2, weekdayWidth: 24, markerWidth: 20 },
+            ],
         };
 
-        const config = configs[rangeKey] || configs.month;
-        const width = Math.max(containerWidth || 0, 240);
-        const gapsWidth = Math.max(weekCount - 1, 0) * config.gap;
-        const availableWidth = Math.max(width - config.weekdayWidth - gapsWidth, weekCount);
-        const fittedCellSize = Math.floor(availableWidth / Math.max(weekCount, 1));
-        const cellSize = Math.min(config.maxCell, Math.max(config.minCell, fittedCellSize));
+        const candidates = layoutsByRange[rangeKey] || layoutsByRange.month;
+        let selected = candidates[candidates.length - 1];
+
+        for (const candidate of candidates) {
+            const gapsWidth = Math.max(weekCount - 1, 0) * candidate.gap;
+            const availableWidth = Math.max(width - candidate.weekdayWidth - gapsWidth, weekCount);
+            const candidateCellSize = Math.floor(availableWidth / Math.max(weekCount, 1));
+
+            if (candidateCellSize >= candidate.minCell) {
+                selected = candidate;
+                break;
+            }
+        }
+
+        const gapsWidth = Math.max(weekCount - 1, 0) * selected.gap;
+        const availableWidth = Math.max(width - selected.weekdayWidth - gapsWidth, weekCount);
+        const cellSize = Math.min(selected.maxCell, Math.max(selected.minCell, Math.floor(availableWidth / Math.max(weekCount, 1))));
         const contentWidth = (weekCount * cellSize) + gapsWidth;
 
         return {
             cellSize,
+            markerWidth: selected.markerWidth,
             contentWidth,
-            gap: config.gap,
-            weekdayWidth: config.weekdayWidth,
+            gap: selected.gap,
+            weekdayWidth: selected.weekdayWidth,
         };
     }
 
     function buildMonthMarkers(cells, layout) {
-        const labelWidth = 28;
-        const minGap = 6;
+        const labelWidth = layout.markerWidth || 28;
+        const minGap = Math.max(layout.gap + 1, 3);
         let lastEnd = -Infinity;
 
         return cells
             .filter((cell, index) => cell.day_of_month === '1' || index === 0)
             .map((cell) => {
-                const weekIndex = Number(cell.week_index);
+                const weekIndex = Number(cell.display_week_index ?? cell.week_index);
                 const idealLeft = weekIndex * (layout.cellSize + layout.gap);
                 const maxLeft = Math.max(layout.contentWidth - labelWidth, 0);
                 const left = Math.max(0, Math.min(maxLeft, Math.max(idealLeft, lastEnd + minGap)));
@@ -231,6 +273,21 @@
                     left,
                 };
             });
+    }
+
+    function buildCalendarCells(cells) {
+        const firstWeekday = Math.max(1, Math.min(7, Number(cells[0]?.weekday || 1)));
+
+        return cells.map((cell, index) => {
+            const displayWeekIndex = Math.floor(((firstWeekday - 1) + index) / 7);
+
+            return {
+                ...cell,
+                display_week_index: displayWeekIndex,
+                display_column: displayWeekIndex + 1,
+                display_row: Math.max(1, Math.min(7, Number(cell.weekday || 1))),
+            };
+        });
     }
 
     function renderDashboardSummaries(panel, data) {
@@ -335,16 +392,17 @@
             return;
         }
 
-        const weekCount = Math.max(...cells.map((cell) => Number(cell.week_index)), 0) + 1;
+        const calendarCells = buildCalendarCells(cells);
+        const weekCount = Math.max(...calendarCells.map((cell) => Number(cell.display_week_index)), 0) + 1;
         const layout = getCalendarLayout(rangeKey, weekCount, container.clientWidth);
-        const monthMarkers = buildMonthMarkers(cells, layout)
+        const monthMarkers = buildMonthMarkers(calendarCells, layout)
             .map((marker) => `<span class="heatmap-month-marker" style="position:absolute; left:${marker.left}px; top:0;">${escapeHtml(marker.label)}</span>`)
             .join('');
         const weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
             .map((label) => `<span>${label}</span>`)
             .join('');
-        const buttons = cells.map((cell) => `
-            <button type="button" class="heatmap-day intensity-${cell.intensity}${cell.is_today ? ' is-today' : ''}" data-history-date="${cell.date}" title="${escapeHtml(cell.long_label)} • ${escapeHtml(String(cell.count))} entries">
+        const buttons = calendarCells.map((cell) => `
+            <button type="button" class="heatmap-day intensity-${cell.intensity}${cell.is_today ? ' is-today' : ''}" data-history-date="${cell.date}" title="${escapeHtml(cell.long_label)} • ${escapeHtml(String(cell.count))} entries" style="grid-column:${cell.display_column}; grid-row:${cell.display_row};">
                 <span class="sr-only">${escapeHtml(cell.long_label)}: ${escapeHtml(String(cell.count))} entries</span>
             </button>
         `).join('');
@@ -354,7 +412,7 @@
             <div
                 class="heatmap-calendar-shell"
                 data-range="${escapeHtml(rangeKey)}"
-                style="--heatmap-cell-size:${layout.cellSize}px; --heatmap-gap:${layout.gap}px; --heatmap-weekday-width:${layout.weekdayWidth}px; --heatmap-content-width:${layout.contentWidth}px;"
+                style="--heatmap-cell-size:${layout.cellSize}px; --heatmap-gap:${layout.gap}px; --heatmap-weekday-width:${layout.weekdayWidth}px; --heatmap-content-width:${layout.contentWidth}px; --heatmap-marker-width:${layout.markerWidth}px;"
             >
                 <div class="heatmap-month-row">
                     <div class="heatmap-month-spacer" aria-hidden="true"></div>
@@ -440,7 +498,10 @@
             return;
         }
 
-        historyModalPreviousFocus = document.activeElement;
+        if (root.hidden) {
+            historyModalPreviousFocus = document.activeElement;
+        }
+
         setModalContext(panel, date);
         root.hidden = false;
         body.innerHTML = '<div class="panel-empty-state"><p class="panel-empty-copy">Loading day details…</p></div>';
@@ -449,7 +510,18 @@
             root.querySelector('.history-modal-close')?.focus();
         });
 
+        const scope = getPanelScope(panel);
+        const entityId = getPanelEntityId(panel);
         const data = await app.apiRequest(buildDayUrl(panel, date));
+        const modalEntityId = root.dataset.entityId ? Number(root.dataset.entityId) : null;
+        const requestIsStale = (root.dataset.date || '') !== date
+            || (root.dataset.scope || 'dashboard') !== scope
+            || modalEntityId !== entityId;
+
+        if (requestIsStale) {
+            return;
+        }
+
         if (!data || data.success === false) {
             body.innerHTML = `<div class="panel-empty-state"><p class="panel-empty-copy">${escapeHtml(data?.message || 'Failed to load day details.')}</p></div>`;
             return;

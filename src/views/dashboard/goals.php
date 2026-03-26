@@ -139,7 +139,7 @@ include __DIR__ . '/../partials/dashboard-start.php';
 <?php if (!empty($goals)): ?>
     <section class="workspace-panel entity-workspace" id="goalWorkspace">
         <div class="workspace-head">
-            <div>
+            <div class="workspace-head-copy">
                 <p class="section-kicker">Selected Goal</p>
                 <h2 id="goalWorkspaceTitle">Select a goal</h2>
                 <p class="workspace-copy" id="goalWorkspaceMeta">Choose a goal card to manage its tasks, habits, and activity history.</p>
@@ -163,53 +163,9 @@ include __DIR__ . '/../partials/dashboard-start.php';
                 </div>
             </div>
         </div>
-        <section class="goal-tracking-grid">
-            <article class="tracking-card">
-                <div class="tracking-card-head">
-                    <h4>Tasks</h4>
-                    <span class="analytics-caption">Completed tasks add history automatically.</span>
-                </div>
-                <form class="tracking-inline-form goal-task-form" id="goalWorkspaceTaskForm">
-                    <input type="hidden" id="goalWorkspaceTaskEditingId" value="">
-                    <div class="inputs">
-                        <label for="goalWorkspaceTaskTitle">Task title</label>
-                        <input type="text" id="goalWorkspaceTaskTitle" class="goal-task-title" maxlength="255" placeholder="Add a concrete task" disabled>
-                    </div>
-                    <div class="tracking-form-actions">
-                        <button type="submit" class="btn-primary" id="goalWorkspaceTaskSubmit" disabled>Add Task</button>
-                        <button type="button" class="btn-action btn-secondary" id="goalWorkspaceTaskCancel" hidden>Cancel</button>
-                    </div>
-                </form>
-                <div class="tracking-message goal-task-message" id="goalWorkspaceTaskMessage" hidden aria-live="polite"></div>
-                <div class="tracking-list goal-task-list" id="goalWorkspaceTaskList">
-                    <p class="panel-empty-copy">Select a goal to load its tasks.</p>
-                </div>
-            </article>
-            <article class="tracking-card">
-                <div class="tracking-card-head">
-                    <h4>Habits</h4>
-                    <span class="analytics-caption">Record repeatable actions when they happen.</span>
-                </div>
-                <form class="tracking-inline-form goal-habit-form" id="goalWorkspaceHabitForm">
-                    <input type="hidden" id="goalWorkspaceHabitEditingId" value="">
-                    <div class="inputs">
-                        <label for="goalWorkspaceHabitTitle">Habit title</label>
-                        <input type="text" id="goalWorkspaceHabitTitle" class="goal-habit-title" maxlength="255" placeholder="Add a repeatable action" disabled>
-                    </div>
-                    <div class="tracking-form-actions">
-                        <button type="submit" class="btn-primary" id="goalWorkspaceHabitSubmit" disabled>Add Habit</button>
-                        <button type="button" class="btn-action btn-secondary" id="goalWorkspaceHabitCancel" hidden>Cancel</button>
-                    </div>
-                </form>
-                <div class="tracking-message goal-habit-message" id="goalWorkspaceHabitMessage" hidden aria-live="polite"></div>
-                <div class="tracking-list goal-habit-list" id="goalWorkspaceHabitList">
-                    <p class="panel-empty-copy">Select a goal to load its habits.</p>
-                </div>
-            </article>
-        </section>
         <section class="entity-history-panel" id="goalHistoryPanel" data-history-scope="goal" data-default-range="30d" data-entity-label="goal">
             <div class="entity-history-head">
-                <div>
+                <div class="analytics-head-copy">
                     <p class="section-kicker">History</p>
                     <h4>Activity And Progress</h4>
                 </div>
@@ -223,7 +179,9 @@ include __DIR__ . '/../partials/dashboard-start.php';
             <div class="entity-history-grid">
                 <section class="analytics-panel">
                     <div class="analytics-panel-head">
-                        <h5>Calendar</h5>
+                        <div class="analytics-panel-copy">
+                            <h5>Calendar</h5>
+                        </div>
                         <button type="button" class="btn-action btn-secondary history-log-trigger" disabled>Add Log</button>
                     </div>
                     <div class="heatmap-mount" data-role="heatmap">
@@ -232,8 +190,10 @@ include __DIR__ . '/../partials/dashboard-start.php';
                 </section>
                 <section class="analytics-panel">
                     <div class="analytics-panel-head">
-                        <h5>Progress</h5>
-                        <span class="analytics-caption">Snapshots from manual updates.</span>
+                        <div class="analytics-panel-copy">
+                            <h5>Progress</h5>
+                            <span class="analytics-caption">Snapshots from manual updates.</span>
+                        </div>
                     </div>
                     <div class="chart-mount" data-role="chart">
                         <p class="panel-empty-copy">Select a goal to load its progress timeline.</p>
@@ -243,6 +203,86 @@ include __DIR__ . '/../partials/dashboard-start.php';
             <div class="entity-history-feed" data-role="recent-feed">
                 <p class="panel-empty-copy">Recent goal history will appear here once a goal is selected.</p>
             </div>
+        </section>
+        <section class="goal-tracking-grid">
+            <article class="tracking-card">
+                <div class="tracking-card-head">
+                    <div class="tracking-card-copy">
+                        <h4>Tasks</h4>
+                        <span class="analytics-caption">Completed tasks add history automatically.</span>
+                    </div>
+                    <div class="tracking-card-actions">
+                        <button
+                            type="button"
+                            class="btn-action tracking-toggle-btn"
+                            id="goalWorkspaceTaskToggle"
+                            aria-controls="goalWorkspaceTaskComposer"
+                            aria-expanded="false"
+                            aria-label="Open task form"
+                            disabled
+                        >
+                            <span class="tracking-toggle-icon" aria-hidden="true">+</span>
+                            <span>New Task</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="tracking-composer" id="goalWorkspaceTaskComposer" hidden>
+                    <form class="tracking-inline-form goal-task-form" id="goalWorkspaceTaskForm">
+                        <input type="hidden" id="goalWorkspaceTaskEditingId" value="">
+                        <div class="inputs">
+                            <label for="goalWorkspaceTaskTitle">Task title</label>
+                            <input type="text" id="goalWorkspaceTaskTitle" class="goal-task-title" maxlength="255" placeholder="Add a concrete task" disabled>
+                        </div>
+                        <div class="tracking-form-actions">
+                            <button type="submit" class="btn-primary" id="goalWorkspaceTaskSubmit" disabled>Save Task</button>
+                            <button type="button" class="btn-action btn-secondary" id="goalWorkspaceTaskCancel" hidden>Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="tracking-message goal-task-message" id="goalWorkspaceTaskMessage" hidden aria-live="polite"></div>
+                <div class="tracking-list goal-task-list" id="goalWorkspaceTaskList">
+                    <p class="panel-empty-copy">Select a goal to load its tasks.</p>
+                </div>
+            </article>
+            <article class="tracking-card">
+                <div class="tracking-card-head">
+                    <div class="tracking-card-copy">
+                        <h4>Habits</h4>
+                        <span class="analytics-caption">Record repeatable actions when they happen.</span>
+                    </div>
+                    <div class="tracking-card-actions">
+                        <button
+                            type="button"
+                            class="btn-action tracking-toggle-btn"
+                            id="goalWorkspaceHabitToggle"
+                            aria-controls="goalWorkspaceHabitComposer"
+                            aria-expanded="false"
+                            aria-label="Open habit form"
+                            disabled
+                        >
+                            <span class="tracking-toggle-icon" aria-hidden="true">+</span>
+                            <span>New Habit</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="tracking-composer" id="goalWorkspaceHabitComposer" hidden>
+                    <form class="tracking-inline-form goal-habit-form" id="goalWorkspaceHabitForm">
+                        <input type="hidden" id="goalWorkspaceHabitEditingId" value="">
+                        <div class="inputs">
+                            <label for="goalWorkspaceHabitTitle">Habit title</label>
+                            <input type="text" id="goalWorkspaceHabitTitle" class="goal-habit-title" maxlength="255" placeholder="Add a repeatable action" disabled>
+                        </div>
+                        <div class="tracking-form-actions">
+                            <button type="submit" class="btn-primary" id="goalWorkspaceHabitSubmit" disabled>Save Habit</button>
+                            <button type="button" class="btn-action btn-secondary" id="goalWorkspaceHabitCancel" hidden>Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="tracking-message goal-habit-message" id="goalWorkspaceHabitMessage" hidden aria-live="polite"></div>
+                <div class="tracking-list goal-habit-list" id="goalWorkspaceHabitList">
+                    <p class="panel-empty-copy">Select a goal to load its habits.</p>
+                </div>
+            </article>
         </section>
     </section>
 <?php endif; ?>

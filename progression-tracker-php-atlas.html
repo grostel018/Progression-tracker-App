@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progression Tracker PHP Atlas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#faf7f2;--bg2:#f4ede2;--surface:#fff;--surface2:#fdf9f3;--text:#2c2a28;--muted:#6b6560;--border:#e5dfd6;--accent:#d94f30;--accent-soft:#fdeee9;--teal:#2a7b9b;--code:#1e1e2e;--radius:16px;--shadow:0 10px 30px rgba(44,42,40,.08)}*{box-sizing:border-box}body{margin:0;font-family:"DM Sans",sans-serif;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text)}h1,h2,h3{margin:0;font-family:"Bricolage Grotesque",serif;line-height:1.1}p{margin:0;color:var(--muted);line-height:1.6}code,pre{font-family:"JetBrains Mono",monospace;white-space:pre-wrap;word-break:break-word}.shell{max-width:1200px;margin:0 auto;padding:32px 20px 56px}.hero{display:grid;gap:20px;padding:28px;border-radius:24px;background:rgba(255,255,255,.7);border:1px solid rgba(229,223,214,.9);box-shadow:var(--shadow)}.eyebrow,.label{font:600 12px "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}.hero h1{font-size:clamp(2rem,4vw,3.6rem)}.hero-grid,.stats,.group-grid,.snippet-grid{display:grid;gap:18px}.hero-grid{grid-template-columns:1.2fr .8fr}.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.stat,.panel,.group,.snippet,.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}.stat,.panel,.snippet,.group{padding:20px}.stat strong{display:block;margin-top:10px;font-size:1.7rem;font-family:"Bricolage Grotesque",serif;color:var(--text)}.sticky{position:sticky;top:0;z-index:20;margin:22px 0;padding:16px 18px;border-radius:18px;background:rgba(250,247,242,.9);backdrop-filter:blur(10px);border:1px solid rgba(229,223,214,.9);display:flex;gap:12px;align-items:center;flex-wrap:wrap}.sticky input{flex:1 1 280px;padding:12px 14px;border-radius:999px;border:1px solid var(--border);background:#fff}.pill{padding:8px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font:600 12px "JetBrains Mono",monospace}.section{margin-top:36px}.section h2{font-size:2rem;margin-bottom:10px}.section-intro{max-width:70ch;margin-bottom:20px}.group-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.group h3{font-size:1.3rem;margin-bottom:8px}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.meta span{font:600 12px "JetBrains Mono",monospace;padding:6px 10px;border-radius:999px;background:#f6f1e8;color:var(--muted)}.cards{display:grid;gap:12px}.card{padding:14px 16px;background:var(--surface2)}.path{display:block;font:600 12px "JetBrains Mono",monospace;color:var(--teal);margin-bottom:6px}.card strong{display:block;margin-bottom:4px}.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.tag{font:600 11px "JetBrains Mono",monospace;padding:4px 8px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted)}.snippet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.snippet pre{margin:14px 0 0;padding:16px;border-radius:14px;background:var(--code);color:#cdd6f4;font-size:12px}.hint{margin-top:12px;padding:14px 16px;border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:12px}.hidden{display:none!important}@media (max-width:980px){.hero-grid,.group-grid,.snippet-grid,.stats{grid-template-columns:1fr 1fr}}@media (max-width:720px){.hero-grid,.group-grid,.snippet-grid,.stats{grid-template-columns:1fr}.shell{padding:20px 14px 44px}}
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <section class="hero">
+            <div class="eyebrow">Companion Atlas</div>
+            <div class="hero-grid">
+                <div>
+                    <h1>Every Active PHP File In Progression Tracker, Mapped In Plain English</h1>
+                    <p>This guide covers the live app PHP files under <code>public/</code>, <code>src/</code>, <code>config/</code>, and <code>scripts/</code>. It excludes duplicate snapshots and legacy archives so you learn the version that actually matters.</p>
+                </div>
+                <div class="panel">
+                    <div class="label">How To Use This</div>
+                    <p>Start with the group that matches your bug or feature. If the symptom is visual, read views and page entries. If the symptom is data-related, read controllers, services, and repositories. If access is weird, read auth, sessions, and bootstrap.</p>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat"><div class="label">Config + Core</div><strong>6</strong><p>Bootstrapping, auth, helpers, database setup.</p></div>
+                <div class="stat"><div class="label">Public Pages</div><strong>11</strong><p>Page entry points and browser-facing routes.</p></div>
+                <div class="stat"><div class="label">API Endpoints</div><strong>17</strong><p>Thin JSON doorways under <code>public/api</code>.</p></div>
+                <div class="stat"><div class="label">Feature PHP</div><strong>36</strong><p>Controllers, services, repositories, views, and the asset sync script.</p></div>
+            </div>
+        </section>
+        <div class="sticky">
+            <input id="search" type="search" placeholder="Search by file name, folder, or idea. Example: history, auth, repository, dashboard">
+            <span class="pill">Active PHP only</span>
+            <span class="pill">Live search</span>
+        </div>
+        <section class="section">
+            <h2>Fast Orientation</h2>
+            <p class="section-intro">The shortest useful mental model is this: <code>public/</code> receives requests, <code>src/lib/</code> prepares the environment, <code>src/api/</code> decides what should happen, <code>src/views/</code> prints HTML, and repositories talk to MySQL.</p>
+            <div class="snippet-grid">
+                <article class="snippet">
+                    <div class="label">Anchor File</div>
+                    <h3><code>src/bootstrap.php</code></h3>
+<pre>define('BASE_PATH', dirname(__DIR__));
+define('SRC_PATH', __DIR__);
+spl_autoload_register(static function (string $class): void {
+    $prefix = 'src\\';</pre>
+                    <p class="hint">This is the app startup script. It defines paths, loads helpers, configures timezone, and sets the session storage path.</p>
+                </article>
+                <article class="snippet">
+                    <div class="label">Anchor File</div>
+                    <h3><code>src/lib/helpers.php</code></h3>
+<pre>function dispatch_resource_controller(object $controller): void
+{
+    $id = request_query_int('id');
+    $input = request_input();</pre>
+                    <p class="hint">This is the utility toolbox: config, views, redirects, sessions, JSON output, and the shared CRUD router.</p>
+                </article>
+                <article class="snippet">
+                    <div class="label">Anchor File</div>
+                    <h3><code>src/api/history/HistoryService.php</code></h3>
+<pre>if ($note === '' &amp;&amp; $progressPercent === null) {
+    return ['success' =&gt; false,
+        'message' =&gt; 'Add a note or a progress update before saving the entry.'];
+}</pre>
+                    <p class="hint">This service turns user actions into timeline entries and analytics inputs. If the history UI looks wrong, inspect this zone early.</p>
+                </article>
+            </div>
+        </section>
+        <section class="section">
+            <h2>PHP File Groups</h2>
+            <p class="section-intro">Each group below includes every active PHP file in the live app. Search filters these cards instantly.</p>
+            <div class="group-grid" id="atlas">
+                <article class="group">
+                    <h3>Config, Bootstrap, And Shared Core</h3>
+                    <div class="meta"><span>6 files</span><span>startup + security + helpers</span></div>
+                    <div class="cards">
+                        <div class="card" data-search="config app php app config timezone session password uploads"><span class="path">config/app.php</span><strong>Global app settings</strong><p>Stores timezone, session cookie behavior, password policy, and upload limits.</p><div class="tags"><span class="tag">config</span><span class="tag">settings</span></div></div>
+                        <div class="card" data-search="config database php db config pdo credentials charset"><span class="path">config/database.php</span><strong>Database credentials and PDO defaults</strong><p>Defines host, database name, user, password, charset, and safe PDO options.</p><div class="tags"><span class="tag">config</span><span class="tag">database</span></div></div>
+                        <div class="card" data-search="src bootstrap php autoload timezone sessions startup"><span class="path">src/bootstrap.php</span><strong>Application startup script</strong><p>Defines base paths, registers autoloading, loads helpers, sets timezone, and points PHP sessions to <code>var/sessions</code>.</p><div class="tags"><span class="tag">bootstrap</span><span class="tag">autoload</span></div></div>
+                        <div class="card" data-search="src lib helpers php redirect view json response session helper resource controller"><span class="path">src/lib/helpers.php</span><strong>Global utility toolbox</strong><p>Contains config lookup, view rendering, redirects, session booting, input parsing, JSON responses, auth helpers, and the shared CRUD dispatcher.</p><div class="tags"><span class="tag">helpers</span><span class="tag">routing</span></div></div>
+                        <div class="card" data-search="src lib database php singleton pdo connection"><span class="path">src/lib/Database.php</span><strong>Singleton PDO connection manager</strong><p>Creates one shared MySQL connection for the request and keeps the rest of the app from opening duplicate handles.</p><div class="tags"><span class="tag">pdo</span><span class="tag">db</span></div></div>
+                        <div class="card" data-search="src lib auth php login logout register session require auth security questions"><span class="path">src/lib/Auth.php</span><strong>Auth engine</strong><p>Handles login, logout, registration, user lookup, auth guards, password rehashing, and security-question storage and verification.</p><div class="tags"><span class="tag">auth</span><span class="tag">session</span></div></div>
+                    </div>
+                </article>
+
+                <article class="group">
+                    <h3>Public Page Entry Points</h3>
+                    <div class="meta"><span>11 files</span><span>browser-facing routes</span></div>
+                    <div class="cards">
+                        <div class="card" data-search="public index php redirect login dashboard root"><span class="path">public/index.php</span><strong>Traffic redirector</strong><p>Checks session state and sends visitors to either <code>dashboard.php</code> or <code>login.php</code>.</p></div>
+                        <div class="card" data-search="public login php guest auth view"><span class="path">public/login.php</span><strong>Login page entry</strong><p>Redirects authenticated users away, then renders the login view.</p></div>
+                        <div class="card" data-search="public register php guest auth view"><span class="path">public/register.php</span><strong>Register page entry</strong><p>Redirects authenticated users away, then renders the registration view.</p></div>
+                        <div class="card" data-search="public forgot php recovery auth view"><span class="path">public/forgot.php</span><strong>Forgot-password page entry</strong><p>Serves the recovery UI for the three-step reset flow.</p></div>
+                        <div class="card" data-search="public dashboard php stats dashboard repository auth user view"><span class="path">public/dashboard.php</span><strong>Main dashboard page</strong><p>Requires a user, loads aggregate stats through <code>DashboardRepository</code>, then renders the dashboard homepage view.</p></div>
+                        <div class="card" data-search="public dreams php dream page auth view"><span class="path">public/dreams.php</span><strong>Dream management page</strong><p>Loads the user’s dreams and renders the interactive dreams workspace.</p></div>
+                        <div class="card" data-search="public goals php goal page auth view"><span class="path">public/goals.php</span><strong>Goal management page</strong><p>Loads goals and renders the task, habit, and history workspace.</p></div>
+                        <div class="card" data-search="public categories php category page auth view"><span class="path">public/categories.php</span><strong>Category management page</strong><p>Loads the user’s categories and renders the category cards and composer.</p></div>
+                        <div class="card" data-search="public logs php activity logs page auth"><span class="path">public/logs.php</span><strong>Audit log page</strong><p>Loads activity log rows and renders the searchable operations feed.</p></div>
+                        <div class="card" data-search="public logout php auth redirect"><span class="path">public/logout.php</span><strong>Logout route</strong><p>Clears the current user session and redirects back to the login page.</p></div>
+                        <div class="card" data-search="public session check php api session passthrough"><span class="path">public/session_check.php</span><strong>Small compatibility shim</strong><p>Simply requires the session API route, likely for older frontend expectations.</p></div>
+                    </div>
+                </article>
+
+                <article class="group">
+                    <h3>Public API Endpoint Files</h3>
+                    <div class="meta"><span>17 files</span><span>thin JSON doorways</span></div>
+                    <div class="cards">
+                        <div class="card" data-search="public api auth login php endpoint loginhandler"><span class="path">public/api/auth/login.php</span><strong>Login API doorway</strong><p>Boots the app and hands the request to <code>LoginHandler</code>.</p></div>
+                        <div class="card" data-search="public api auth register php endpoint registerhandler"><span class="path">public/api/auth/register.php</span><strong>Register API doorway</strong><p>Boots the app and hands the request to <code>RegisterHandler</code>.</p></div>
+                        <div class="card" data-search="public api auth forgot php endpoint forgotpasswordhandler"><span class="path">public/api/auth/forgot.php</span><strong>Recovery-question loader</strong><p>Starts the forgot-password flow by validating the email and returning security questions.</p></div>
+                        <div class="card" data-search="public api auth security questions php endpoint"><span class="path">public/api/auth/security-questions.php</span><strong>Security-question list API</strong><p>Returns the available recovery-question choices for registration.</p></div>
+                        <div class="card" data-search="public api auth verify security php endpoint"><span class="path">public/api/auth/verify-security.php</span><strong>Security-answer verification API</strong><p>Checks recovery answers and issues a temporary reset token.</p></div>
+                        <div class="card" data-search="public api auth reset password php endpoint"><span class="path">public/api/auth/reset-password.php</span><strong>Password reset API</strong><p>Consumes the temporary token and writes the new password hash.</p></div>
+                        <div class="card" data-search="public api categories php crud endpoint"><span class="path">public/api/categories.php</span><strong>Categories CRUD endpoint</strong><p>Delegates GET/POST/PUT/DELETE handling to <code>CategoryController</code>.</p></div>
+                        <div class="card" data-search="public api dreams php crud endpoint"><span class="path">public/api/dreams.php</span><strong>Dreams CRUD endpoint</strong><p>Delegates resource operations to <code>DreamController</code>.</p></div>
+                        <div class="card" data-search="public api goals php crud endpoint"><span class="path">public/api/goals.php</span><strong>Goals CRUD endpoint</strong><p>Delegates resource operations to <code>GoalController</code>.</p></div>
+                        <div class="card" data-search="public api goal tasks php endpoint"><span class="path">public/api/goal-tasks.php</span><strong>Goal-task endpoint</strong><p>Handles list, create, update, and delete operations for goal tasks.</p></div>
+                        <div class="card" data-search="public api goal habits php endpoint"><span class="path">public/api/goal-habits.php</span><strong>Goal-habit endpoint</strong><p>Handles list, create, update, and delete operations for goal habits.</p></div>
+                        <div class="card" data-search="public api goal habit logs php endpoint"><span class="path">public/api/goal-habit-logs.php</span><strong>Habit-action recording endpoint</strong><p>Accepts POST requests that record a habit action and create timeline evidence.</p></div>
+                        <div class="card" data-search="public api goal logs php endpoint legacy history"><span class="path">public/api/goal-logs.php</span><strong>Goal log compatibility endpoint</strong><p>Older-style goal log route that now delegates manual-entry creation to the history system.</p></div>
+                        <div class="card" data-search="public api history php endpoint analytics"><span class="path">public/api/history.php</span><strong>History and analytics endpoint</strong><p>Serves overviews, day details, and manual history-entry creation.</p></div>
+                        <div class="card" data-search="public api logs php activity logs endpoint"><span class="path">public/api/logs.php</span><strong>Activity-log JSON endpoint</strong><p>Returns audit log rows for the authenticated user.</p></div>
+                        <div class="card" data-search="public api session php endpoint auth state"><span class="path">public/api/session.php</span><strong>Session status endpoint</strong><p>Returns whether the browser is authenticated and basic user information if so.</p></div>
+                        <div class="card" data-search="public api achievements php endpoint"><span class="path">public/api/achievements.php</span><strong>Achievements endpoint</strong><p>Returns achievement records earned by the current user.</p></div>
+                    </div>
+                </article>
+
+                <article class="group">
+                    <h3>Auth Feature Classes</h3>
+                    <div class="meta"><span>8 files</span><span>validation + login + recovery</span></div>
+                    <div class="cards">
+                        <div class="card" data-search="src api auth authinputvalidator php validation"><span class="path">src/api/auth/AuthInputValidator.php</span><strong>Auth rule checker</strong><p>Validates login, register, and recovery inputs before deeper auth logic runs.</p></div>
+                        <div class="card" data-search="src api auth loginhandler php"><span class="path">src/api/auth/LoginHandler.php</span><strong>Login coordinator</strong><p>Validates credentials, asks <code>Auth.php</code> to log the user in, and logs the login event.</p></div>
+                        <div class="card" data-search="src api auth registerhandler php"><span class="path">src/api/auth/RegisterHandler.php</span><strong>Registration coordinator</strong><p>Creates the user, optionally stores security questions, and writes an activity log record.</p></div>
+                        <div class="card" data-search="src api auth forgotpasswordhandler php"><span class="path">src/api/auth/ForgotPasswordHandler.php</span><strong>Recovery question loader</strong><p>Validates the email and returns the stored questions tied to that account.</p></div>
+                        <div class="card" data-search="src api auth securityquestionhandler php"><span class="path">src/api/auth/SecurityQuestionHandler.php</span><strong>Security-question service layer</strong><p>Returns default questions when needed and verifies user-provided answers during recovery.</p></div>
+                        <div class="card" data-search="src api auth resetpasswordhandler php"><span class="path">src/api/auth/ResetPasswordHandler.php</span><strong>Password reset finisher</strong><p>Checks reset token validity, enforces password rules, writes the new hash, and clears recovery session state.</p></div>
+                        <div class="card" data-search="src api auth sessionmanager php"><span class="path">src/api/auth/SessionManager.php</span><strong>Session status helper</strong><p>Returns a clean JSON shape describing whether the current session is authenticated.</p></div>
+                        <div class="card" data-search="src api auth logouthandler php"><span class="path">src/api/auth/LogoutHandler.php</span><strong>Logout coordinator</strong><p>Calls the shared auth engine to end the current session cleanly.</p></div>
+                    </div>
+                </article>
+
+                <article class="group">
+                    <h3>Dashboard, Categories, Dreams, And Shared Logs</h3>
+                    <div class="meta"><span>7 files</span><span>base hierarchy + summaries</span></div>
+                    <div class="cards">
+                        <div class="card" data-search="src api dashboard dashboardrepository php"><span class="path">src/api/dashboard/DashboardRepository.php</span><strong>Dashboard stat summarizer</strong><p>Counts dreams, active goals, streaks, and achievements for the dashboard cards.</p></div>
+                        <div class="card" data-search="src api categories categorycontroller php"><span class="path">src/api/categories/CategoryController.php</span><strong>Category decision layer</strong><p>Guards category access, validates category creation, and records create/update/delete operations in activity logs.</p></div>
+                        <div class="card" data-search="src api categories categoryrepository php"><span class="path">src/api/categories/CategoryRepository.php</span><strong>Category query layer</strong><p>Reads and writes category rows, including dream counts per category.</p></div>
+                        <div class="card" data-search="src api dreams dreamcontroller php"><span class="path">src/api/dreams/DreamController.php</span><strong>Dream decision layer</strong><p>Handles dream CRUD actions and logs those actions in the audit trail.</p></div>
+                        <div class="card" data-search="src api dreams dreamrepository php"><span class="path">src/api/dreams/DreamRepository.php</span><strong>Dream query layer</strong><p>Reads, creates, updates, deletes, and summarizes dream rows, including attached history counts.</p></div>
+                        <div class="card" data-search="src api achievements achievementrepository php"><span class="path">src/api/achievements/AchievementRepository.php</span><strong>Achievement query layer</strong><p>Reads achievement rows already earned by the current user.</p></div>
+                        <div class="card" data-search="src api logs activitylogrepository php"><span class="path">src/api/logs/ActivityLogRepository.php</span><strong>Audit trail repository</strong><p>Stores and reads operational log events such as logins and create/update/delete actions.</p></div>
+                    </div>
+                </article>
+
+                <article class="group">
+                    <h3>Goals, Tasks, Habits, And Goal Tracking</h3>
+                    <div class="meta"><span>8 files</span><span>execution layer of the app</span></div>
+                    <div class="cards">
+                        <div class="card" data-search="src api goals goalcontroller php"><span class="path">src/api/goals/GoalController.php</span><strong>Goal decision layer</strong><p>Handles goal CRUD and logs those operations in the audit trail.</p></div>
+                        <div class="card" data-search="src api goals goalrepository php"><span class="path">src/api/goals/GoalRepository.php</span><strong>Goal query layer</strong><p>Reads, writes, and summarizes goals, including linked dream titles, task counts, habit counts, and history totals.</p></div>
+                        <div class="card" data-search="src api goals goaltaskcontroller php"><span class="path">src/api/goals/GoalTaskController.php</span><strong>Task endpoint brain</strong><p>Chooses between task edits and completion toggles, then delegates to the tracking service.</p></div>
+                        <div class="card" data-search="src api goals goaltaskrepository php"><span class="path">src/api/goals/GoalTaskRepository.php</span><strong>Task query layer</strong><p>Stores task rows, updates completion state, and manages task ordering.</p></div>
+                        <div class="card" data-search="src api goals goalhabitcontroller php"><span class="path">src/api/goals/GoalHabitController.php</span><strong>Habit endpoint brain</strong><p>Handles creation, update, deletion, and listing of goal habits.</p></div>
+                        <div class="card" data-search="src api goals goalhabitrepository php"><span class="path">src/api/goals/GoalHabitRepository.php</span><strong>Habit query layer</strong><p>Stores habit rows, counts today’s actions, counts total actions, and writes habit log rows.</p></div>
+                        <div class="card" data-search="src api goals goalhabitlogcontroller php"><span class="path">src/api/goals/GoalHabitLogController.php</span><strong>Habit-action endpoint</strong><p>Receives habit action requests and delegates them to the tracking service.</p></div>
+                        <div class="card" data-search="src api goals goaltrackingservice php"><span class="path">src/api/goals/GoalTrackingService.php</span><strong>Goal tracking orchestration layer</strong><p>Coordinates tasks, habits, habit actions, task completions, and the history side effects that make analytics work.</p></div>
+                    </div>
+                </article>
+
+                <article class="group">
+                    <h3>History And Analytics</h3>
+                    <div class="meta"><span>5 files</span><span>timeline + charts + heatmaps</span></div>
+                    <div class="cards">
+                        <div class="card" data-search="src api history historycontroller php"><span class="path">src/api/history/HistoryController.php</span><strong>History endpoint brain</strong><p>Routes history requests into overview mode, day-detail mode, or manual-entry creation.</p></div>
+                        <div class="card" data-search="src api history historyservice php"><span class="path">src/api/history/HistoryService.php</span><strong>History orchestration layer</strong><p>Builds dashboard overviews, entity overviews, day detail payloads, and validated manual-entry creation.</p></div>
+                        <div class="card" data-search="src api history historyrepository php"><span class="path">src/api/history/HistoryRepository.php</span><strong>History query layer</strong><p>Reads and writes history entries and progress snapshots, including heatmap counts and progress-series points.</p></div>
+                        <div class="card" data-search="src api history trackablerepository php"><span class="path">src/api/history/TrackableRepository.php</span><strong>Cross-entity lookup helper</strong><p>Lets the history system find goals and dreams generically so one analytics system can serve both.</p></div>
+                        <div class="card" data-search="src api goals goallogcontroller php legacy history"><span class="path">src/api/goals/GoalLogController.php</span><strong>Legacy goal-log bridge</strong><p>Provides compatibility for older goal log actions, but now redirects manual log creation into the shared history service.</p></div>
+                    </div>
+                </article>
+
+                <article class="group">
+                    <h3>Views, Partials, And Utility Script</h3>
+                    <div class="meta"><span>11 files</span><span>rendering + build helper</span></div>
+                    <div class="cards">
+                        <div class="card" data-search="src views auth login php"><span class="path">src/views/auth/login.php</span><strong>Login HTML template</strong><p>Renders the login shell, console-style copy, fields, and empty error box used by <code>auth.js</code>.</p></div>
+                        <div class="card" data-search="src views auth register php"><span class="path">src/views/auth/register.php</span><strong>Registration HTML template</strong><p>Renders the registration form, including security-question selectors.</p></div>
+                        <div class="card" data-search="src views auth forgot php"><span class="path">src/views/auth/forgot.php</span><strong>Recovery HTML template</strong><p>Renders the multi-step password recovery form that <code>auth.js</code> progressively expands.</p></div>
+                        <div class="card" data-search="src views partials dashboard start php"><span class="path">src/views/partials/dashboard-start.php</span><strong>Dashboard shell opener</strong><p>Starts the shared dashboard document, sidebar, nav, and global script loading.</p></div>
+                        <div class="card" data-search="src views partials dashboard end php"><span class="path">src/views/partials/dashboard-end.php</span><strong>Dashboard shell closer</strong><p>Closes shared dashboard markup and common UI elements.</p></div>
+                        <div class="card" data-search="src views dashboard index php"><span class="path">src/views/dashboard/index.php</span><strong>Dashboard homepage view</strong><p>Shows stat cards, dashboard history heatmap, chart, and recent activity summary panels.</p></div>
+                        <div class="card" data-search="src views dashboard categories php"><span class="path">src/views/dashboard/categories.php</span><strong>Category management view</strong><p>Shows category cards, counts, and the inline category composer.</p></div>
+                        <div class="card" data-search="src views dashboard dreams php"><span class="path">src/views/dashboard/dreams.php</span><strong>Dream management view</strong><p>Shows dream cards, inline editing form, and the selected-dream history workspace.</p></div>
+                        <div class="card" data-search="src views dashboard goals php"><span class="path">src/views/dashboard/goals.php</span><strong>Goal management view</strong><p>Shows goal cards, task and habit forms, and the selected-goal history workspace.</p></div>
+                        <div class="card" data-search="src views dashboard logs php"><span class="path">src/views/dashboard/logs.php</span><strong>Audit-log view</strong><p>Renders operational log rows with search, filter, and detail display.</p></div>
+                        <div class="card" data-search="scripts sync assets php"><span class="path">scripts/sync-assets.php</span><strong>Asset copy utility</strong><p>Copies changed files from <code>src/assets</code> to <code>public/assets</code> so browser-served assets stay in sync.</p></div>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+    <script>
+        (() => {
+            const input = document.getElementById('search');
+            const cards = Array.from(document.querySelectorAll('.card'));
+            const groups = Array.from(document.querySelectorAll('.group'));
+            function filter() {
+                const query = input.value.trim().toLowerCase();
+                cards.forEach((card) => {
+                    const text = (card.dataset.search || '') + ' ' + card.textContent.toLowerCase();
+                    card.classList.toggle('hidden', query && !text.includes(query));
+                });
+                groups.forEach((group) => {
+                    group.classList.toggle('hidden', !group.querySelector('.card:not(.hidden)'));
+                });
+            }
+            input.addEventListener('input', filter);
+        })();
+    </script>
+</body>
+</html>

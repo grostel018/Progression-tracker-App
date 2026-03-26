@@ -210,6 +210,8 @@ function initGoalWorkspace(app) {
     const taskEditingIdField = document.getElementById('goalWorkspaceTaskEditingId');
     const taskSubmit = document.getElementById('goalWorkspaceTaskSubmit');
     const taskCancel = document.getElementById('goalWorkspaceTaskCancel');
+    const taskToggle = document.getElementById('goalWorkspaceTaskToggle');
+    const taskComposer = document.getElementById('goalWorkspaceTaskComposer');
     const taskMessage = document.getElementById('goalWorkspaceTaskMessage');
     const taskList = document.getElementById('goalWorkspaceTaskList');
     const habitForm = document.getElementById('goalWorkspaceHabitForm');
@@ -217,10 +219,12 @@ function initGoalWorkspace(app) {
     const habitEditingIdField = document.getElementById('goalWorkspaceHabitEditingId');
     const habitSubmit = document.getElementById('goalWorkspaceHabitSubmit');
     const habitCancel = document.getElementById('goalWorkspaceHabitCancel');
+    const habitToggle = document.getElementById('goalWorkspaceHabitToggle');
+    const habitComposer = document.getElementById('goalWorkspaceHabitComposer');
     const habitMessage = document.getElementById('goalWorkspaceHabitMessage');
     const habitList = document.getElementById('goalWorkspaceHabitList');
 
-    if (!cards.length || !panel || !title || !meta || !progress || !entries || !tasksMetric || !habitsMetric || !addLogButton || !taskForm || !taskTitleField || !taskEditingIdField || !taskSubmit || !taskCancel || !taskMessage || !taskList || !habitForm || !habitTitleField || !habitEditingIdField || !habitSubmit || !habitCancel || !habitMessage || !habitList) {
+    if (!cards.length || !panel || !title || !meta || !progress || !entries || !tasksMetric || !habitsMetric || !addLogButton || !taskForm || !taskTitleField || !taskEditingIdField || !taskSubmit || !taskCancel || !taskToggle || !taskComposer || !taskMessage || !taskList || !habitForm || !habitTitleField || !habitEditingIdField || !habitSubmit || !habitCancel || !habitToggle || !habitComposer || !habitMessage || !habitList) {
         return;
     }
 
@@ -228,26 +232,70 @@ function initGoalWorkspace(app) {
 
     function setWorkspaceEnabled(enabled) {
         addLogButton.disabled = !enabled;
+        taskToggle.disabled = !enabled;
         taskTitleField.disabled = !enabled;
         taskSubmit.disabled = !enabled;
+        habitToggle.disabled = !enabled;
         habitTitleField.disabled = !enabled;
         habitSubmit.disabled = !enabled;
         taskCancel.disabled = !enabled;
         habitCancel.disabled = !enabled;
     }
 
-    function resetTaskForm() {
-        taskForm.reset();
-        taskEditingIdField.value = '';
-        taskSubmit.textContent = 'Add Task';
-        taskCancel.hidden = true;
+    function setComposerState(toggle, composer, isOpen, focusEl = null) {
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        toggle.classList.toggle('is-open', isOpen);
+
+        if (isOpen) {
+            app.openCollapsible(composer, focusEl);
+            return;
+        }
+
+        if (composer.hidden) {
+            return;
+        }
+
+        app.closeCollapsible(composer);
     }
 
-    function resetHabitForm() {
+    function openTaskComposer(focusEl = taskTitleField) {
+        taskToggle.setAttribute('aria-label', 'Close task form');
+        setComposerState(taskToggle, taskComposer, true, focusEl);
+    }
+
+    function closeTaskComposer() {
+        setComposerState(taskToggle, taskComposer, false);
+    }
+
+    function openHabitComposer(focusEl = habitTitleField) {
+        habitToggle.setAttribute('aria-label', 'Close habit form');
+        setComposerState(habitToggle, habitComposer, true, focusEl);
+    }
+
+    function closeHabitComposer() {
+        setComposerState(habitToggle, habitComposer, false);
+    }
+
+    function resetTaskForm(closeComposer = true) {
+        taskForm.reset();
+        taskEditingIdField.value = '';
+        taskSubmit.textContent = 'Save Task';
+        taskCancel.hidden = true;
+        taskToggle.setAttribute('aria-label', 'Open task form');
+        if (closeComposer) {
+            closeTaskComposer();
+        }
+    }
+
+    function resetHabitForm(closeComposer = true) {
         habitForm.reset();
         habitEditingIdField.value = '';
-        habitSubmit.textContent = 'Add Habit';
+        habitSubmit.textContent = 'Save Habit';
         habitCancel.hidden = true;
+        habitToggle.setAttribute('aria-label', 'Open habit form');
+        if (closeComposer) {
+            closeHabitComposer();
+        }
     }
 
     function setMetricsFromCard(card) {
@@ -430,6 +478,38 @@ function initGoalWorkspace(app) {
         await loadHabits();
     });
 
+    taskToggle.addEventListener('click', () => {
+        if (taskToggle.disabled) {
+            return;
+        }
+
+        if (taskToggle.getAttribute('aria-expanded') === 'true') {
+            resetTaskForm();
+            app.setMessage(taskMessage, '');
+            return;
+        }
+
+        resetTaskForm(false);
+        openTaskComposer();
+        app.setMessage(taskMessage, '');
+    });
+
+    habitToggle.addEventListener('click', () => {
+        if (habitToggle.disabled) {
+            return;
+        }
+
+        if (habitToggle.getAttribute('aria-expanded') === 'true') {
+            resetHabitForm();
+            app.setMessage(habitMessage, '');
+            return;
+        }
+
+        resetHabitForm(false);
+        openHabitComposer();
+        app.setMessage(habitMessage, '');
+    });
+
     taskCancel.addEventListener('click', () => {
         resetTaskForm();
         app.setMessage(taskMessage, '');
@@ -475,7 +555,7 @@ function initGoalWorkspace(app) {
             taskTitleField.value = editButton.dataset.taskTitle || '';
             taskSubmit.textContent = 'Update Task';
             taskCancel.hidden = false;
-            taskTitleField.focus();
+            openTaskComposer(taskTitleField);
             return;
         }
 
@@ -509,7 +589,7 @@ function initGoalWorkspace(app) {
             habitTitleField.value = editButton.dataset.habitTitle || '';
             habitSubmit.textContent = 'Update Habit';
             habitCancel.hidden = false;
-            habitTitleField.focus();
+            openHabitComposer(habitTitleField);
             return;
         }
 

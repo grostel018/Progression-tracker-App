@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inside Progression Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--color-bg:#faf7f2;--color-bg-warm:#f4ede2;--color-bg-code:#1e1e2e;--color-text:#2c2a28;--color-text-secondary:#6b6560;--color-text-muted:#9e9790;--color-border:#e5dfd6;--color-border-light:#eeebe5;--color-surface:#fff;--color-surface-warm:#fdf9f3;--color-accent:#d94f30;--color-accent-light:#fdeee9;--color-accent-muted:#e8836c;--color-success:#2d8b55;--color-success-light:#e8f5ee;--color-error:#c93b3b;--color-error-light:#fde8e8;--color-info:#2a7b9b;--color-info-light:#e4f2f7;--color-actor-1:#d94f30;--color-actor-2:#2a7b9b;--color-actor-3:#7b6daa;--color-actor-4:#d4a843;--color-actor-5:#2d8b55;--font-display:'Bricolage Grotesque',Georgia,serif;--font-body:'DM Sans',-apple-system,sans-serif;--font-mono:'JetBrains Mono','Fira Code','Consolas',monospace;--text-xs:.75rem;--text-sm:.875rem;--text-base:1rem;--text-lg:1.125rem;--text-xl:1.25rem;--text-2xl:1.5rem;--text-3xl:1.875rem;--text-4xl:2.25rem;--text-6xl:3.75rem;--leading-normal:1.6;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;--nav-height:60px;--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-full:9999px;--shadow-sm:0 1px 2px rgba(44,42,40,.05);--shadow-md:0 4px 12px rgba(44,42,40,.08);--shadow-lg:0 8px 24px rgba(44,42,40,.1);--ease-out:cubic-bezier(.16,1,.3,1);--duration-fast:150ms;--duration-normal:300ms;--duration-slow:500ms}
+        *{box-sizing:border-box}html{scroll-snap-type:y proximity;scroll-behavior:smooth}body{margin:0;font-family:var(--font-body);color:var(--color-text);background:var(--color-bg);background-image:radial-gradient(circle at 10% 20%,rgba(217,79,48,.05),transparent 26%),radial-gradient(circle at 80% 10%,rgba(42,123,155,.05),transparent 24%)}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--color-border);border-radius:var(--radius-full)}p{margin:0;line-height:var(--leading-normal);color:var(--color-text-secondary)}h1,h2,h3,h4{margin:0;font-family:var(--font-display);line-height:1.15;color:var(--color-text)}button,input,select,textarea{font:inherit}pre,code{white-space:pre-wrap;word-break:break-word;overflow-x:hidden}
+        .nav{position:fixed;top:0;left:0;right:0;height:var(--nav-height);backdrop-filter:blur(14px);background:rgba(250,247,242,.88);border-bottom:1px solid rgba(229,223,214,.9);z-index:1000}.progress-bar{position:absolute;left:0;bottom:0;height:3px;width:0;background:linear-gradient(90deg,var(--color-accent),var(--color-actor-2));transition:width var(--duration-fast) linear}.nav-inner{height:100%;max-width:1200px;margin:0 auto;padding:0 var(--space-6);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4)}.nav-title{font-family:var(--font-display);font-weight:700}.nav-dots{display:flex;gap:var(--space-2);flex-wrap:wrap}.nav-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--color-text-muted);background:transparent;cursor:pointer;transition:transform var(--duration-fast),background var(--duration-fast),border-color var(--duration-fast),box-shadow var(--duration-fast)}.nav-dot.current{border-color:var(--color-accent);background:var(--color-accent-light);box-shadow:0 0 0 3px rgba(217,79,48,.16);transform:scale(1.1)}.nav-dot.visited{background:var(--color-accent);border-color:var(--color-accent)}
+        .module{min-height:100vh;min-height:100dvh;scroll-snap-align:start;padding:var(--space-16) var(--space-6);padding-top:calc(var(--nav-height) + var(--space-12))}.module:nth-of-type(odd){background:var(--color-bg-warm)}.module:nth-of-type(even){background:var(--color-bg)}.module-content{max-width:1100px;margin:0 auto}.module-header{display:grid;grid-template-columns:120px minmax(0,1fr);gap:var(--space-6);align-items:end;margin-bottom:var(--space-12)}.module-number{font-family:var(--font-display);font-size:var(--text-6xl);font-weight:800;color:rgba(217,79,48,.18);line-height:.9}.module-kicker,.section-kicker,.translation-label,.quiz-label,.stat-label,.arch-zone-label{font-family:var(--font-mono);font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em}.module-kicker,.section-kicker{color:var(--color-accent);display:inline-block;margin-bottom:var(--space-2)}.module-title{font-size:var(--text-4xl);margin-bottom:var(--space-3)}.module-subtitle{max-width:64ch;font-size:var(--text-lg)}.module-body{display:flex;flex-direction:column;gap:var(--space-10)}.screen{background:rgba(255,255,255,.74);border:1px solid rgba(229,223,214,.75);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:var(--space-8)}.screen-heading{font-size:var(--text-2xl);margin-bottom:var(--space-3)}.screen-intro{max-width:62ch;margin-bottom:var(--space-6)}
+        .hero-grid,.two-col,.wide-two-col,.compare-grid,.summary-band,.stat-grid,.translation-block,.arch-zones{display:grid;gap:var(--space-6)}.hero-grid{grid-template-columns:1.2fr .8fr}.two-col,.compare-grid,.summary-band,.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wide-two-col{grid-template-columns:1.1fr .9fr}.summary-band{grid-template-columns:repeat(3,minmax(0,1fr))}.hero-card,.stat-card,.pattern-card,.scenario-context,.arch-component,.icon-row,.step-card,.entity-pill,.compare-card,.chat-window,.flow-animation,.arch-diagram,.quiz-container{background:var(--color-surface);border:1px solid var(--color-border-light);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)}.hero-card,.compare-card,.pattern-card,.chat-window,.flow-animation,.arch-diagram,.quiz-container{padding:var(--space-6)}.pattern-cards,.icon-rows,.step-cards,.badge-list{display:grid;gap:var(--space-4)}.pattern-cards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.pattern-card{border-top:3px solid var(--color-accent)}.pattern-icon,.icon-circle,.flow-actor-icon,.chat-avatar,.callout-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}.pattern-icon{margin-bottom:var(--space-4)}.icon-row{display:flex;gap:var(--space-4);align-items:flex-start;padding:var(--space-4)}.step-card{display:flex;gap:var(--space-4);padding:var(--space-4);border-left:3px solid var(--color-accent)}.step-num{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--color-accent);color:#fff;font-family:var(--font-display);font-weight:700;flex-shrink:0}
+        .flow-steps{display:flex;align-items:stretch;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-6)}.flow-step{flex:1 1 160px;background:var(--color-surface);border:1px solid var(--color-border-light);border-radius:var(--radius-md);padding:var(--space-4);box-shadow:var(--shadow-sm)}.flow-arrow{align-self:center;font-size:1.8rem;color:var(--color-accent-muted)}.translation-block{grid-template-columns:1fr 1fr;border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-md);margin-top:var(--space-6);margin-bottom:var(--space-6)}.translation-code{position:relative;background:var(--color-bg-code);color:#cdd6f4;padding:var(--space-6);font-family:var(--font-mono);font-size:var(--text-sm);line-height:1.7}.translation-english{position:relative;background:var(--color-surface-warm);padding:var(--space-6);border-left:3px solid var(--color-accent)}.translation-label{position:absolute;top:var(--space-3);right:var(--space-4);opacity:.55}.translation-lines{display:grid;gap:var(--space-3);margin-top:var(--space-6)}.tl{font-size:var(--text-sm)}
+        .callout{display:grid;grid-template-columns:auto 1fr;gap:var(--space-4);padding:var(--space-5);border-radius:var(--radius-md);margin-top:var(--space-5);margin-bottom:var(--space-5)}.callout-accent{background:var(--color-accent-light);border-left:4px solid var(--color-accent)}.callout-info{background:var(--color-info-light);border-left:4px solid var(--color-info)}.callout-warning{background:var(--color-error-light);border-left:4px solid var(--color-error)}.callout-icon{background:rgba(255,255,255,.65);color:var(--color-text)}
+        .file-tree{font-family:var(--font-mono);font-size:var(--text-sm);display:grid;gap:var(--space-2)}.ft-folder,.ft-file{padding:var(--space-3);border-left:2px solid var(--color-border-light);margin-left:var(--space-4)}.ft-name{color:var(--color-text);font-weight:600}.ft-folder>.ft-name::before{content:'📁 '}.ft-file>.ft-name::before{content:'📄 '}.ft-desc{display:block;margin-top:.25rem;font-family:var(--font-body);font-size:var(--text-xs);color:var(--color-text-secondary)}.ft-children{margin-left:var(--space-4);margin-top:var(--space-2);display:grid;gap:var(--space-2)}
+        .chat-window,.flow-animation,.arch-diagram,.quiz-container{margin-top:var(--space-6)}.chat-messages{display:grid;gap:var(--space-4);margin-bottom:var(--space-4)}.chat-message,.chat-typing{display:flex;align-items:flex-start;gap:var(--space-3)}.chat-bubble{background:var(--color-surface-warm);border:1px solid var(--color-border-light);border-radius:var(--radius-md);padding:var(--space-4);max-width:520px}.chat-sender{display:block;font-size:var(--text-xs);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:var(--space-2)}.chat-controls,.flow-controls,.quiz-controls{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-4);align-items:center}.btn{border:none;border-radius:var(--radius-full);padding:.8rem 1.1rem;cursor:pointer;transition:transform var(--duration-fast),background var(--duration-fast),border-color var(--duration-fast)}.btn:hover{transform:translateY(-1px)}.btn-primary{background:var(--color-accent);color:#fff}.btn-secondary{background:transparent;color:var(--color-text);border:1px solid var(--color-border)}.chat-typing-dots{display:flex;gap:6px;padding:.8rem 1rem;background:var(--color-surface-warm);border-radius:var(--radius-full)}.typing-dot{width:8px;height:8px;border-radius:50%;background:var(--color-text-muted);animation:typingBounce 1.4s infinite}.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+        .flow-actors{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--space-3);margin-bottom:var(--space-6)}.flow-actor{background:var(--color-surface-warm);border:1px solid var(--color-border-light);border-radius:var(--radius-md);padding:var(--space-4);text-align:center;min-height:112px;display:flex;flex-direction:column;justify-content:center;gap:var(--space-2)}.flow-actor.active{box-shadow:0 0 0 3px var(--color-accent),0 0 20px rgba(217,79,48,.16);transform:scale(1.03)}.flow-label{padding:var(--space-4);background:var(--color-accent-light);border-radius:var(--radius-md);min-height:72px;display:flex;align-items:center}
+        .arch-zones{grid-template-columns:1.15fr 1fr .85fr}.arch-zone{display:grid;gap:var(--space-3)}.arch-component{padding:var(--space-4);cursor:pointer;text-align:left}.arch-component:hover,.arch-component.active{border-color:var(--color-accent-muted);background:var(--color-accent-light)}.arch-description{padding:var(--space-5);background:var(--color-surface-warm);border-radius:var(--radius-md);border:1px solid var(--color-border-light);min-height:100px}
+        .quiz-question-block+.quiz-question-block{margin-top:var(--space-6)}.quiz-question{font-size:var(--text-lg);margin-bottom:var(--space-3)}.scenario-context{padding:var(--space-4);margin-bottom:var(--space-3);background:var(--color-surface-warm)}.quiz-options{display:grid;gap:var(--space-3)}.quiz-option{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);border:2px solid var(--color-border);border-radius:var(--radius-sm);background:var(--color-surface);width:100%;cursor:pointer;text-align:left}.quiz-option.selected{border-color:var(--color-accent);background:var(--color-accent-light)}.quiz-option.correct{border-color:var(--color-success);background:var(--color-success-light)}.quiz-option.incorrect{border-color:var(--color-error);background:var(--color-error-light)}.quiz-option-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--color-border);flex-shrink:0}.quiz-option.selected .quiz-option-radio{border-color:var(--color-accent);background:var(--color-accent);box-shadow:inset 0 0 0 3px #fff}.quiz-feedback,.quiz-overall-feedback{max-height:0;overflow:hidden;opacity:0;transition:max-height var(--duration-normal),opacity var(--duration-normal)}.quiz-feedback.show,.quiz-overall-feedback.show{opacity:1;max-height:200px;padding:var(--space-3);margin-top:var(--space-2);border-radius:var(--radius-sm)}.quiz-feedback.success,.quiz-overall-feedback.success{background:var(--color-success-light);color:var(--color-success)}.quiz-feedback.error,.quiz-overall-feedback.error{background:var(--color-error-light);color:var(--color-error)}
+        .term{border-bottom:1.5px dashed var(--color-accent-muted);cursor:pointer}.term:hover,.term.active{border-bottom-color:var(--color-accent);color:var(--color-accent)}.term-tooltip{position:fixed;background:var(--color-bg-code);color:#cdd6f4;padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);font-size:var(--text-sm);line-height:var(--leading-normal);width:max(220px,min(320px,80vw));box-shadow:var(--shadow-lg);pointer-events:none;opacity:0;transition:opacity var(--duration-fast);z-index:10000}.term-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--color-bg-code)}.term-tooltip.flip::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--color-bg-code)}.term-tooltip.visible{opacity:1}
+        .animate-in{opacity:0;transform:translateY(20px);transition:opacity var(--duration-slow) var(--ease-out),transform var(--duration-slow) var(--ease-out)}.animate-in.visible{opacity:1;transform:translateY(0)}
+        .entity-pill-row{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-4)}.entity-pill{padding:.65rem .9rem;font-size:var(--text-sm)}.footer-note{text-align:center;padding:var(--space-8);color:var(--color-text-muted);font-size:var(--text-sm)}
+        @media (max-width:1024px){.hero-grid,.wide-two-col,.arch-zones{grid-template-columns:1fr}.flow-actors{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (max-width:768px){:root{--text-4xl:1.875rem;--text-6xl:3rem}.module{padding:var(--space-10) var(--space-4);padding-top:calc(var(--nav-height) + var(--space-8))}.module-header,.two-col,.compare-grid,.summary-band,.stat-grid,.translation-block{grid-template-columns:1fr}.translation-english{border-left:none;border-top:3px solid var(--color-accent)}.flow-steps{flex-direction:column}.flow-arrow{transform:rotate(90deg)}.nav-inner{padding:0 var(--space-4)}}@media (max-width:560px){.flow-actors{grid-template-columns:repeat(2,minmax(0,1fr))}.chat-controls,.flow-controls,.quiz-controls{flex-direction:column;align-items:stretch}}
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="progress-bar" id="progressBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="nav-inner">
+            <span class="nav-title">Inside Progression Tracker</span>
+            <div class="nav-dots" aria-label="Course modules">
+                <button class="nav-dot" data-target="module-1" aria-label="Module 1"></button>
+                <button class="nav-dot" data-target="module-2" aria-label="Module 2"></button>
+                <button class="nav-dot" data-target="module-3" aria-label="Module 3"></button>
+                <button class="nav-dot" data-target="module-4" aria-label="Module 4"></button>
+                <button class="nav-dot" data-target="module-5" aria-label="Module 5"></button>
+                <button class="nav-dot" data-target="module-6" aria-label="Module 6"></button>
+                <button class="nav-dot" data-target="module-7" aria-label="Module 7"></button>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <section class="module" id="module-1">
+            <div class="module-content">
+                <header class="module-header animate-in">
+                    <span class="module-number">01</span>
+                    <div>
+                        <span class="module-kicker">What The App Does</span>
+                        <h1 class="module-title">From Login Screen To Personal Progress Control Room</h1>
+                        <p class="module-subtitle">This app is a personal tracking system. You log in, store categories, connect dreams to those categories, break dreams into goals, and then turn goals into daily proof through tasks, habits, and history entries.</p>
+                    </div>
+                </header>
+                <div class="module-body">
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">Think Of It Like A Ladder, Not A Spreadsheet</h2>
+                        <p class="screen-intro">A spreadsheet metaphor misses the point. This project behaves more like a climbing wall: <span class="term" data-definition="A category is a top-level bucket for related work. Here it groups dreams, like putting several life plans into labeled shelves.">categories</span> hold the broad zones, <span class="term" data-definition="A dream is a long-range ambition stored in the database. It is bigger and slower-moving than a goal.">dreams</span> are long arcs, <span class="term" data-definition="A goal is a concrete target tied to one dream. It is smaller, more trackable, and can have tasks and habits attached.">goals</span> are the reachable grips, and history shows every move you made.</p>
+                        <div class="hero-grid">
+                            <div class="hero-card">
+                                <span class="section-kicker">User Journey</span>
+                                <h3>The path a normal user follows</h3>
+                                <div class="flow-steps">
+                                    <div class="flow-step"><div class="step-num">1</div><strong>Sign in</strong><p>The app restores your session and sends you to the dashboard.</p></div>
+                                    <div class="flow-arrow">→</div>
+                                    <div class="flow-step"><div class="step-num">2</div><strong>Create structure</strong><p>Add categories, then dreams, then goals that belong to those dreams.</p></div>
+                                    <div class="flow-arrow">→</div>
+                                    <div class="flow-step"><div class="step-num">3</div><strong>Generate evidence</strong><p>Complete tasks, record habits, or type manual updates to build the timeline.</p></div>
+                                    <div class="flow-arrow">→</div>
+                                    <div class="flow-step"><div class="step-num">4</div><strong>Read the signals</strong><p>The dashboard heatmap and charts show whether progress is real or imagined.</p></div>
+                                </div>
+                            </div>
+                            <div class="hero-card">
+                                <span class="section-kicker">Why This Matters</span>
+                                <h3>What you gain by understanding it</h3>
+                                <div class="stat-grid">
+                                    <div class="stat-card"><span class="stat-label">Steer AI</span><h4>Better file targeting</h4><p>You can tell an AI “change the controller, not the view” and mean it.</p></div>
+                                    <div class="stat-card"><span class="stat-label">Debug</span><h4>Faster symptom tracing</h4><p>You will know whether a bug lives in PHP rendering, fetch logic, or SQL.</p></div>
+                                    <div class="stat-card"><span class="stat-label">Design</span><h4>Smarter features</h4><p>You can extend the history system without bolting on random tables.</p></div>
+                                    <div class="stat-card"><span class="stat-label">Vocabulary</span><h4>Cleaner prompts</h4><p>You will stop saying “the shared code thing” and start saying <span class="term" data-definition="A bootstrap file is the startup script that prepares the app before the rest of the code runs. It loads shared helpers, sessions, and configuration.">bootstrap</span> or <span class="term" data-definition="A repository is a focused class that handles database reads and writes for one feature. It keeps SQL out of the presentation layer.">repository</span>.</p></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code">
+                                <span class="translation-label">Code</span>
+<pre><code>&lt;?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../src/bootstrap.php';
+
+start_app_session();
+
+redirect(isset($_SESSION['user_id']) ? 'dashboard.php' : 'login.php');</code></pre>
+                            </div>
+                            <div class="translation-english">
+                                <span class="translation-label">Plain English</span>
+                                <div class="translation-lines">
+                                    <p class="tl">Load the shared startup file so the app has helpers, config, and session logic ready.</p>
+                                    <p class="tl">Open the session, which is the server-side memory that remembers who you are between page loads.</p>
+                                    <p class="tl">If the session already contains a user ID, jump straight to the dashboard. If not, send the visitor to the login page.</p>
+                                    <p class="tl">This is why the root URL behaves like a traffic officer instead of a real page.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="callout callout-accent">
+                            <div class="callout-icon">💡</div>
+                            <div><strong>Practical Insight</strong><p>Good apps often start with a routing decision before they show anything. If AI suggests putting that logic deep inside a view template, that is a smell.</p></div>
+                        </div>
+                    </section>
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">The Data Ladder The App Is Really Tracking</h2>
+                        <p class="screen-intro">Every screen in this app is answering the same question: “What did you actually move forward?” The database mirrors that ladder exactly.</p>
+                        <div class="pattern-cards">
+                            <div class="pattern-card" style="border-top-color:var(--color-actor-1)"><div class="pattern-icon" style="background:var(--color-actor-1)">C</div><h4 class="pattern-title">Categories</h4><p>Simple buckets. They organize dreams and stop the app from turning into one giant flat list.</p></div>
+                            <div class="pattern-card" style="border-top-color:var(--color-actor-2)"><div class="pattern-icon" style="background:var(--color-actor-2)">D</div><h4 class="pattern-title">Dreams</h4><p>Long-term ambitions with status, dates, and a progress percentage.</p></div>
+                            <div class="pattern-card" style="border-top-color:var(--color-actor-3)"><div class="pattern-icon" style="background:var(--color-actor-3)">G</div><h4 class="pattern-title">Goals</h4><p>Trackable targets attached to one dream, with type and current progress.</p></div>
+                            <div class="pattern-card" style="border-top-color:var(--color-actor-4)"><div class="pattern-icon" style="background:var(--color-actor-4)">H</div><h4 class="pattern-title">History</h4><p>Manual logs, task completions, habit actions, and progress snapshots all land here.</p></div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code">
+                                <span class="translation-label">Code</span>
+<pre><code>CREATE TABLE goals (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    dream_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    goal_type ENUM('daily','weekly','monthly','yearly') NOT NULL,
+    start_date DATE NOT NULL,
+    estimated_finish_date DATE,
+    current_progress_percent TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    goal_reached TINYINT(1) DEFAULT 0,
+    status ENUM('active','paused','completed','failed') DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;</code></pre>
+                            </div>
+                            <div class="translation-english">
+                                <span class="translation-label">Plain English</span>
+                                <div class="translation-lines">
+                                    <p class="tl">A goal belongs to one user and one dream, so the app always knows whose target it is and what bigger ambition it supports.</p>
+                                    <p class="tl">The table stores timing fields, progress, and a small status label so the app can show whether the goal is active, paused, completed, or failed.</p>
+                                    <p class="tl">This is a good example of a table that stores business meaning, not just generic text.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quiz-container" id="quiz-1">
+                            <p class="quiz-label">Module 1 Quiz</p>
+                            <div class="quiz-question-block" data-correct="b" data-correct-message="Exactly. The root page decides where to send you based on session state." data-wrong-message="Not quite. The root page is a traffic redirect, not the actual dashboard view.">
+                                <div class="scenario-context"><p>You type the site’s base URL into the browser. What job does `public/index.php` actually do first?</p></div>
+                                <div class="quiz-options">
+                                    <button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>It queries every table and builds the dashboard itself</span></button>
+                                    <button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>It checks session state and redirects to either `dashboard.php` or `login.php`</span></button>
+                                    <button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>It waits for JavaScript to decide which page to render</span></button>
+                                </div><div class="quiz-feedback"></div>
+                            </div>
+                            <div class="quiz-question-block" data-correct="c" data-correct-message="Right. The app is modeling a ladder: category → dream → goal → evidence of progress." data-wrong-message="Close, but the structure is more intentional than that. The entities are arranged in layers.">
+                                <div class="scenario-context"><p>You want to explain the product to an AI before asking for new features. Which summary is the most accurate?</p></div>
+                                <div class="quiz-options">
+                                    <button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>It is mainly a spreadsheet viewer with a login page attached</span></button>
+                                    <button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>It is mostly a charting app that sometimes stores goals</span></button>
+                                    <button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>It is a progress system where categories contain dreams, dreams contain goals, and history proves movement</span></button>
+                                </div><div class="quiz-feedback"></div>
+                            </div>
+                            <div class="quiz-question-block" data-correct="a" data-correct-message="Yes. Understanding the ladder helps you ask for changes in the right layer." data-wrong-message="The UI matters, but the most reusable insight here is the data model and ownership chain.">
+                                <div class="scenario-context"><p>Why should you care about the category → dream → goal structure if you mostly work through AI prompts?</p></div>
+                                <div class="quiz-options">
+                                    <button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>Because it tells you where new features should attach and what records they should belong to</span></button>
+                                    <button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>Because it makes the CSS load faster</span></button>
+                                    <button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>Because it replaces the need to read any backend code</span></button>
+                                </div><div class="quiz-feedback"></div>
+                            </div>
+                            <div class="quiz-controls"><button class="btn btn-primary" data-check-quiz="quiz-1">Check Answers</button><button class="btn btn-secondary" data-reset-quiz="quiz-1">Try Again</button></div>
+                            <div class="quiz-overall-feedback"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+
+        <section class="module" id="module-2">
+            <div class="module-content">
+                <header class="module-header animate-in">
+                    <span class="module-number">02</span>
+                    <div>
+                        <span class="module-kicker">Meet The Actors</span>
+                        <h1 class="module-title">The Cast: Public Entry Points, Views, Controllers, Repositories, And Shared Helpers</h1>
+                        <p class="module-subtitle">A theater metaphor fits this codebase well. The audience sees the stage, but backstage there are very different jobs: ticket desk, stage manager, prop room, and script library.</p>
+                    </div>
+                </header>
+                <div class="module-body">
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">The Folder Map Is The Best Cheat Sheet In The Repo</h2>
+                        <p class="screen-intro">If you only remember one structural fact, remember this: `public/` receives requests, `src/views/` renders HTML, `src/api/` decides behavior, and `src/lib/` holds shared infrastructure.</p>
+                        <div class="wide-two-col">
+                            <div class="hero-card">
+                                <span class="section-kicker">Visual File Tree</span>
+                                <div class="file-tree">
+                                    <div class="ft-folder">
+                                        <span class="ft-name">public/</span><span class="ft-desc">Web-facing files. The browser can request these directly.</span>
+                                        <div class="ft-children">
+                                            <div class="ft-file"><span class="ft-name">dashboard.php</span><span class="ft-desc">Protects the page, gathers stats, then renders the dashboard view.</span></div>
+                                            <div class="ft-folder"><span class="ft-name">api/</span><span class="ft-desc">Thin PHP entry points for JSON endpoints.</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="ft-folder"><span class="ft-name">src/views/</span><span class="ft-desc">PHP templates that output HTML.</span></div>
+                                    <div class="ft-folder"><span class="ft-name">src/api/</span><span class="ft-desc">Feature logic, including controllers and request handlers.</span></div>
+                                    <div class="ft-folder"><span class="ft-name">src/lib/</span><span class="ft-desc">Shared helpers such as <span class="term" data-definition="PDO is PHP’s standard database interface. It lets the app prepare SQL safely and talk to MySQL without hand-building raw query strings everywhere.">PDO</span>, auth, config lookup, sessions, and rendering helpers.</span></div>
+                                    <div class="ft-folder"><span class="ft-name">DB/</span><span class="ft-desc">SQL schema and migrations that define the data model.</span></div>
+                                </div>
+                            </div>
+                            <div class="hero-card">
+                                <span class="section-kicker">Actor Cards</span>
+                                <div class="icon-rows">
+                                    <div class="icon-row"><div class="icon-circle" style="background:var(--color-actor-1)">P</div><div><strong>Public entry point</strong><p>The front door. It knows how to accept a request, not how to run the whole business.</p></div></div>
+                                    <div class="icon-row"><div class="icon-circle" style="background:var(--color-actor-2)">V</div><div><strong>View</strong><p>The HTML painter. It should display information, not write SQL.</p></div></div>
+                                    <div class="icon-row"><div class="icon-circle" style="background:var(--color-actor-3)">C</div><div><strong>Controller / handler</strong><p>The decision-maker. It validates input, chooses what happens next, and shapes the response.</p></div></div>
+                                    <div class="icon-row"><div class="icon-circle" style="background:var(--color-actor-4)">R</div><div><strong>Repository</strong><p>The database specialist. It owns queries for one feature area.</p></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code">
+                                <span class="translation-label">Code</span>
+<pre><code>&lt;?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../src/bootstrap.php';
+
+use src\api\dashboard\DashboardRepository;
+
+boot_database();
+$user = require_auth_user();
+$stats = (new DashboardRepository())-&gt;getStats((int) $user['id']);
+
+view('dashboard/index', [
+    'user' =&gt; $user,
+    'stats' =&gt; $stats,
+]);</code></pre>
+                            </div>
+                            <div class="translation-english">
+                                <span class="translation-label">Plain English</span>
+                                <div class="translation-lines">
+                                    <p class="tl">This page file is thin on purpose. It boots the app, requires a logged-in user, and asks the dashboard repository for stats.</p>
+                                    <p class="tl">Then it hands simple data into a view template. That separation is why the page stays readable.</p>
+                                    <p class="tl">If AI tries to cram SQL into the view or huge HTML into the repository, you now know that is crossing roles.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="callout callout-info">
+                            <div class="callout-icon">🧭</div>
+                            <div><strong>Debugging Shortcut</strong><p>When a page looks wrong, inspect the view first. When the wrong data shows up, inspect the controller or repository first. That single split will save you hours.</p></div>
+                        </div>
+                    </section>
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">Click The Architecture To See Each Job</h2>
+                        <p class="screen-intro">This is the app’s backstage map. Click any block and read what it really does.</p>
+                        <div class="arch-diagram">
+                            <div class="arch-zones">
+                                <div class="arch-zone">
+                                    <span class="arch-zone-label">Browser Surface</span>
+                                    <button class="arch-component active" data-arch-desc="The browser receives fully rendered HTML pages like login, dashboard, dreams, goals, and logs. Then small JavaScript files wake up and enhance those pages with fetch requests and inline interactions."><h4>Rendered Pages</h4><p>Login, dashboard, goals, dreams, categories, logs</p></button>
+                                    <button class="arch-component" data-arch-desc="`public/assets/js/auth.js`, `app.js`, `goals.js`, `dreams.js`, `categories.js`, and `history.js` improve the UI after the page loads. They do not replace PHP rendering; they augment it."><h4>Enhancement JS</h4><p>Validation, fetch calls, collapsible forms, analytics panels</p></button>
+                                </div>
+                                <div class="arch-zone">
+                                    <span class="arch-zone-label">PHP Traffic Layer</span>
+                                    <button class="arch-component" data-arch-desc="Files in `public/` and `public/api/` are the app’s doorways. They accept the incoming request, boot shared code, and route the request to the right logic."><h4>Public Entry Files</h4><p>Thin page and API receivers</p></button>
+                                    <button class="arch-component" data-arch-desc="Controllers and handlers in `src/api/` make decisions. They validate input, check auth, call repositories or services, and shape JSON or page data."><h4>Controllers / Handlers</h4><p>Decision-making layer</p></button>
+                                </div>
+                                <div class="arch-zone">
+                                    <span class="arch-zone-label">State And Storage</span>
+                                    <button class="arch-component" data-arch-desc="Repositories talk to MySQL through PDO. They keep SQL away from templates, which makes the code easier to reason about and easier to extend."><h4>Repositories</h4><p>Feature-specific database access</p></button>
+                                    <button class="arch-component" data-arch-desc="MySQL stores users, categories, dreams, goals, tasks, habits, history entries, progress snapshots, achievements, and security-question answers. Sessions are stored in `var/sessions` on disk by PHP."><h4>MySQL + Sessions</h4><p>Long-term data and login memory</p></button>
+                                </div>
+                            </div>
+                            <div class="arch-description" id="archDescription">The browser sees pages first, then enhancement JavaScript. That means this app is server-rendered at heart, not a single-page app pretending to be PHP.</div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code">
+                                <span class="translation-label">Code</span>
+<pre><code>&lt;?php
+
+declare(strict_types=1);
+
+define('BASE_PATH', dirname(__DIR__));
+define('SRC_PATH', __DIR__);
+
+spl_autoload_register(static function (string $class): void {
+    $prefix = 'src\\';
+
+    if (strncmp($class, $prefix, strlen($prefix)) !== 0) {
+        return;
+    }
+
+    $relativeClass = substr($class, strlen($prefix));
+    $path = SRC_PATH . '/' . str_replace('\\', '/', $relativeClass) . '.php';
+
+    if (is_file($path)) {
+        require_once $path;
+    }
+});</code></pre>
+                            </div>
+                            <div class="translation-english">
+                                <span class="translation-label">Plain English</span>
+                                <div class="translation-lines">
+                                    <p class="tl">This is the autoloader inside `src/bootstrap.php`. It teaches PHP how to find classes automatically when the code references something like `src\api\goals\GoalController`.</p>
+                                    <p class="tl">Without this, every file would need a pile of manual `require_once` lines. With it, PHP turns class names into file paths behind the scenes.</p>
+                                    <p class="tl">That is a strong sign this project wants organized modules, not one giant script.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quiz-container" id="quiz-2">
+                            <p class="quiz-label">Module 2 Quiz</p>
+                            <div class="quiz-question-block" data-correct="c" data-correct-message="Correct. SQL belongs in the repository layer, not the view." data-wrong-message="Not quite. The clue is about ownership: templates should display, repositories should query.">
+                                <div class="scenario-context"><p>An AI adds a big SQL query directly inside `src/views/dashboard/goals.php`. What is the best correction?</p></div>
+                                <div class="quiz-options">
+                                    <button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>Leave it there because the view already knows the HTML</span></button>
+                                    <button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>Move it into JavaScript because JS is closer to the browser</span></button>
+                                    <button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>Move the query into a repository and let the page/controller pass the results into the view</span></button>
+                                </div><div class="quiz-feedback"></div>
+                            </div>
+                            <div class="quiz-question-block" data-correct="a" data-correct-message="Exactly. The public file is a thin doorway, not the whole house." data-wrong-message="The public file is usually intentionally small. It routes and boots, then hands off.">
+                                <div class="scenario-context"><p>You open `public/api/goals.php` and it looks tiny. Why is that usually a good sign?</p></div>
+                                <div class="quiz-options">
+                                    <button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>Because the entry point is staying thin and delegating real work to deeper layers</span></button>
+                                    <button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>Because small files always mean the app has no bugs</span></button>
+                                    <button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>Because public files are supposed to contain only CSS</span></button>
+                                </div><div class="quiz-feedback"></div>
+                            </div>
+                            <div class="quiz-question-block" data-correct="b" data-correct-message="Yes. The autoloader exists so new classes can be discovered automatically from their namespace path." data-wrong-message="Close, but the key win is automatic class loading, not database speed or CSS generation.">
+                                <div class="scenario-context"><p>Why should a vibe coder care that `bootstrap.php` registers an autoloader?</p></div>
+                                <div class="quiz-options">
+                                    <button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>It makes charts animate faster</span></button>
+                                    <button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>It lets the project grow into many files without manual include chaos</span></button>
+                                    <button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>It means JavaScript can skip all fetch requests</span></button>
+                                </div><div class="quiz-feedback"></div>
+                            </div>
+                            <div class="quiz-controls"><button class="btn btn-primary" data-check-quiz="quiz-2">Check Answers</button><button class="btn btn-secondary" data-reset-quiz="quiz-2">Try Again</button></div>
+                            <div class="quiz-overall-feedback"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+        <section class="module" id="module-3">
+            <div class="module-content">
+                <header class="module-header animate-in">
+                    <span class="module-number">03</span>
+                    <div>
+                        <span class="module-kicker">Page Request Flow</span>
+                        <h1 class="module-title">How PHP Turns A Request Into A Screen</h1>
+                        <p class="module-subtitle">This module uses a hotel metaphor. The browser is the guest, `public/*.php` is the front desk, the view is the room layout, and shared helpers are the systems running behind the walls.</p>
+                    </div>
+                </header>
+                <div class="module-body">
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">A Dashboard Visit Is A Chain Of Small Decisions</h2>
+                        <p class="screen-intro">The dashboard page does not magically “know” your stats. It follows a reliable sequence: boot, authenticate, query, render, enhance.</p>
+                        <div class="flow-animation" id="pageFlow">
+                            <div class="flow-actors">
+                                <div class="flow-actor active" id="page-browser"><div class="flow-actor-icon" style="background:var(--color-actor-1)">1</div><strong>Browser</strong><p>User requests `dashboard.php`.</p></div>
+                                <div class="flow-actor" id="page-public"><div class="flow-actor-icon" style="background:var(--color-actor-2)">2</div><strong>`public/dashboard.php`</strong><p>Thin page entry point.</p></div>
+                                <div class="flow-actor" id="page-auth"><div class="flow-actor-icon" style="background:var(--color-actor-3)">3</div><strong>`Auth.php`</strong><p>Checks session and current user.</p></div>
+                                <div class="flow-actor" id="page-repo"><div class="flow-actor-icon" style="background:var(--color-actor-4)">4</div><strong>`DashboardRepository`</strong><p>Fetches dream, goal, streak, and achievement counts.</p></div>
+                                <div class="flow-actor" id="page-view"><div class="flow-actor-icon" style="background:var(--color-actor-5)">5</div><strong>PHP View</strong><p>Outputs the dashboard HTML.</p></div>
+                                <div class="flow-actor" id="page-js"><div class="flow-actor-icon" style="background:var(--color-accent)">6</div><strong>`history.js` + `dashboard.js`</strong><p>Wake up after the page reaches the browser.</p></div>
+                            </div>
+                            <div class="flow-label" id="pageFlowLabel">Click “Next Step” to trace the dashboard load.</div>
+                            <div class="flow-controls"><button class="btn btn-primary" data-flow-next="pageFlow">Next Step</button><button class="btn btn-secondary" data-flow-reset="pageFlow">Restart</button><span id="pageFlowProgress">Step 0 / 6</span></div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code"><span class="translation-label">Code</span>
+<pre><code>&lt;?php
+/** @var array $user */
+/** @var string $pageId */
+/** @var string $pageTitle */
+/** @var string $activePage */
+/** @var array&lt;int, string&gt; $pageScripts */
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;meta name="theme-color" content="#040806"&gt;
+    &lt;title&gt;&lt;?= safe_output($pageTitle) ?&gt; - Progression Tracker&lt;/title&gt;
+    &lt;link rel="stylesheet" href="&lt;?= safe_output(asset_url('assets/css/style.css')) ?&gt;"&gt;
+    &lt;script defer src="&lt;?= safe_output(asset_url('assets/js/app.js')) ?&gt;"&gt;&lt;/script&gt;
+    &lt;script defer src="&lt;?= safe_output(asset_url('assets/js/history.js')) ?&gt;"&gt;&lt;/script&gt;</code></pre></div>
+                            <div class="translation-english"><span class="translation-label">Plain English</span><div class="translation-lines">
+                                <p class="tl">This partial builds the page shell used by dashboard-area screens. It receives a few variables, prints a normal HTML document, and wires in shared CSS and JavaScript.</p>
+                                <p class="tl">Notice the order: the server creates the structure first, then the browser downloads `app.js` and `history.js` as helpers that enhance what PHP already rendered.</p>
+                                <p class="tl">That is why the project feels modern without being a full frontend framework app.</p>
+                            </div></div>
+                        </div>
+                    </section>
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">The View And The Repository Are Deliberately Kept Apart</h2>
+                        <p class="screen-intro">The dashboard view knows how to display stats cards. The dashboard repository knows how to count dreams, active goals, streaks, and achievements. That split is the whole trick.</p>
+                        <div class="compare-grid">
+                            <div class="compare-card"><h3>Healthy split</h3><p>The view prints labels and numbers. The repository runs SQL and returns plain data. The page file glues them together.</p></div>
+                            <div class="compare-card"><h3>Bad split</h3><p>If the view queried MySQL directly, design changes would risk breaking data logic. If the repository returned HTML, backend code would become harder to reuse.</p></div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code"><span class="translation-label">Code</span>
+<pre><code>public function getStats(int $userId): array
+{
+    $stats = [
+        'total_dreams' =&gt; 0,
+        'active_goals' =&gt; 0,
+        'current_streak' =&gt; 0,
+        'achievements' =&gt; 0,
+    ];
+
+    $stmt = $this-&gt;db-&gt;prepare('SELECT COUNT(*) FROM dreams WHERE user_id = ?');
+    $stmt-&gt;execute([$userId]);
+    $stats['total_dreams'] = (int) $stmt-&gt;fetchColumn();
+
+    $stmt = $this-&gt;db-&gt;prepare('SELECT COUNT(*) FROM goals WHERE user_id = ? AND status = ?');
+    $stmt-&gt;execute([$userId, 'active']);
+    $stats['active_goals'] = (int) $stmt-&gt;fetchColumn();</code></pre></div>
+                            <div class="translation-english"><span class="translation-label">Plain English</span><div class="translation-lines">
+                                <p class="tl">`DashboardRepository` starts with safe zero values so the page has predictable output even if later queries fail or optional tables are missing.</p>
+                                <p class="tl">Then it asks the database focused counting questions, one by one: how many dreams does this user have, and how many active goals?</p>
+                                <p class="tl">This is classic summary-query code. It is boring in the best possible way, which makes it reliable.</p>
+                            </div></div>
+                        </div>
+                        <div class="callout callout-warning"><div class="callout-icon">⚠</div><div><strong>Common AI Mistake</strong><p>AI tools often want to “modernize” this into a single-page app because they see some JavaScript. That would be a rewrite, not a refactor. The project’s real architecture is server-rendered first.</p></div></div>
+                        <div class="quiz-container" id="quiz-3">
+                            <p class="quiz-label">Module 3 Quiz</p>
+                            <div class="quiz-question-block" data-correct="b" data-correct-message="Correct. A normal page visit becomes HTML on the server first, then JS enhances it." data-wrong-message="Not quite. In this project, the browser does not build the dashboard from scratch with client-side rendering."><div class="scenario-context"><p>When a user visits `dashboard.php`, which description best matches the real flow?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>The browser fetches raw JSON first and only later asks PHP for HTML</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>PHP authenticates, collects stats, renders HTML, and then browser-side JavaScript enhances the page</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>The view queries the database directly and bypasses repositories</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="a" data-correct-message="Exactly. Shared partials keep the shell consistent across dashboard pages." data-wrong-message="The dashboard partial is more than visual decoration. It standardizes layout and asset loading."><div class="scenario-context"><p>Why does `dashboard-start.php` matter even though it mostly looks like HTML?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>It provides a shared page shell so every dashboard page loads the same layout and core scripts</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>It permanently stores dashboard data in the database</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>It replaces the need for authentication checks</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="c" data-correct-message="Right. If dashboard numbers are wrong, summary queries are a prime suspect." data-wrong-message="CSS can make numbers look ugly, but it usually cannot make the counts themselves wrong."><div class="scenario-context"><p>The “Active Goals” count looks wrong, but the page still loads fine. Where would you inspect first?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>The Google Fonts link</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>The dashboard view markup only</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>The repository query that counts goals by user and status</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-controls"><button class="btn btn-primary" data-check-quiz="quiz-3">Check Answers</button><button class="btn btn-secondary" data-reset-quiz="quiz-3">Try Again</button></div><div class="quiz-overall-feedback"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+        <section class="module" id="module-4">
+            <div class="module-content">
+                <header class="module-header animate-in">
+                    <span class="module-number">04</span>
+                    <div>
+                        <span class="module-kicker">Browser To Backend</span>
+                        <h1 class="module-title">How JavaScript Sends Requests Without Turning The App Into A SPA</h1>
+                        <p class="module-subtitle">Here the best metaphor is a courier network. The browser writes a package, `fetch()` carries it to a PHP endpoint, the controller routes it, and JSON comes back as the receipt.</p>
+                    </div>
+                </header>
+                <div class="module-body">
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">`app.js` Is The Shared Courier Desk</h2>
+                        <p class="screen-intro">Instead of letting every page invent its own request logic, this app centralizes common behavior in `window.dashboardApp`. That gives every feature the same authentication, message, and error patterns.</p>
+                        <div class="chat-window" id="apiChat">
+                            <div class="chat-messages">
+                                <div class="chat-message" data-sender="actor-1" hidden><div class="chat-avatar" style="background:var(--color-actor-1)">J</div><div class="chat-bubble"><span class="chat-sender" style="color:var(--color-actor-1)">`goals.js`</span><p>The user clicked “Save Goal.” I’m packaging the title, dates, dream ID, and progress into JSON.</p></div></div>
+                                <div class="chat-message" data-sender="actor-2" hidden><div class="chat-avatar" style="background:var(--color-actor-2)">A</div><div class="chat-bubble"><span class="chat-sender" style="color:var(--color-actor-2)">`app.js`</span><p>I’ll send the request with cookies included and ask the server for `application/json` back.</p></div></div>
+                                <div class="chat-message" data-sender="actor-3" hidden><div class="chat-avatar" style="background:var(--color-actor-3)">P</div><div class="chat-bubble"><span class="chat-sender" style="color:var(--color-actor-3)">`public/api/goals.php`</span><p>I’m just the doorway. I boot the app and dispatch the request to `GoalController`.</p></div></div>
+                                <div class="chat-message" data-sender="actor-4" hidden><div class="chat-avatar" style="background:var(--color-actor-4)">C</div><div class="chat-bubble"><span class="chat-sender" style="color:var(--color-actor-4)">`GoalController`</span><p>I check auth, validate required fields, call the repository, and return success or failure as JSON.</p></div></div>
+                                <div class="chat-message" data-sender="actor-5" hidden><div class="chat-avatar" style="background:var(--color-actor-5)">M</div><div class="chat-bubble"><span class="chat-sender" style="color:var(--color-actor-5)">MySQL</span><p>The goal row is stored. The controller can now tell the browser what happened.</p></div></div>
+                            </div>
+                            <div class="chat-typing" hidden><div class="chat-avatar" data-chat-avatar>?</div><div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>
+                            <div class="chat-controls"><button class="btn btn-primary" data-chat-next="apiChat">Next Message</button><button class="btn btn-secondary" data-chat-play="apiChat">Play All</button><button class="btn btn-secondary" data-chat-reset="apiChat">Replay</button><span class="chat-progress">0 / 5 messages</span></div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code"><span class="translation-label">Code</span>
+<pre><code>async function apiRequest(endpoint, options = {}) {
+    try {
+        const response = await fetch(endpoint, {
+            credentials: 'include',
+            ...options,
+            headers: {
+                Accept: 'application/json',
+                ...options.headers,
+            },
+        });
+
+        if (response.status === 401) {
+            window.location.href = 'login.php';
+            return null;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: 'Request failed. Check your connection and try again.',
+        };
+    }
+}</code></pre></div>
+                            <div class="translation-english"><span class="translation-label">Plain English</span><div class="translation-lines">
+                                <p class="tl">This helper wraps `fetch()` so every request behaves the same way. It includes cookies, asks for JSON, and catches network failures.</p>
+                                <p class="tl">If the server answers with `401`, which means “you are not authorized,” the browser is pushed back to `login.php`.</p>
+                                <p class="tl">That one function quietly removes a lot of repeated code from the page modules.</p>
+                            </div></div>
+                        </div>
+                    </section>
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">Resource Controllers Keep CRUD Predictable</h2>
+                        <p class="screen-intro">For categories, dreams, and goals, the app uses the same CRUD pattern over and over: GET for list/show, POST for create, PUT for update, DELETE for removal.</p>
+                        <div class="pattern-cards">
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-1)">G</div><h4 class="pattern-title">GET</h4><p>Read data. Used when forms need category or dream options, or when panels refresh.</p></div>
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-2)">P</div><h4 class="pattern-title">POST</h4><p>Create new rows such as goals, dreams, categories, tasks, or history entries.</p></div>
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-3)">U</div><h4 class="pattern-title">PUT</h4><p>Update existing rows, such as changing goal status or toggling task completion.</p></div>
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-4)">D</div><h4 class="pattern-title">DELETE</h4><p>Remove rows after confirmation, then refresh the UI.</p></div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code"><span class="translation-label">Code</span>
+<pre><code>function dispatch_resource_controller(object $controller): void
+{
+    $id = request_query_int('id');
+    $input = request_input();
+
+    switch (request_method()) {
+        case 'GET':
+            json_response($id &gt; 0 ? $controller-&gt;show($id) : $controller-&gt;index());
+            return;
+
+        case 'POST':
+            json_response($controller-&gt;store($input));
+            return;
+
+        case 'PUT':
+            json_response($controller-&gt;update($id, $input));
+            return;
+
+        case 'DELETE':
+            json_response($controller-&gt;delete($id));
+            return;
+    }
+}</code></pre></div>
+                            <div class="translation-english"><span class="translation-label">Plain English</span><div class="translation-lines">
+                                <p class="tl">This helper is a traffic cop for standard JSON endpoints. It inspects the <span class="term" data-definition="An HTTP method is the verb of a web request. Examples: GET asks for data, POST creates data, PUT updates data, and DELETE removes data.">HTTP method</span> and sends the request to the matching controller method.</p>
+                                <p class="tl">That means category, dream, and goal APIs can stay tiny because the dispatch pattern is shared.</p>
+                                <p class="tl">If you ever add a new CRUD-style feature, this helper tells you what shape the endpoint will probably follow.</p>
+                            </div></div>
+                        </div>
+                        <div class="quiz-container" id="quiz-4">
+                            <p class="quiz-label">Module 4 Quiz</p>
+                            <div class="quiz-question-block" data-correct="b" data-correct-message="Exactly. `app.js` centralizes fetch behavior so feature files do not keep rewriting it." data-wrong-message="Not quite. The point is shared request behavior, not animation or SQL generation."><div class="scenario-context"><p>Why is `apiRequest()` in `app.js` valuable beyond just saving a few lines?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>It turns the app into React without needing React installed</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>It standardizes cookies, JSON headers, 401 handling, and error messages across the dashboard</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>It prevents PHP from running on the server</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="a" data-correct-message="Correct. A 401 means the user is no longer authorized, so redirecting to login is sensible." data-wrong-message="The function handles expired auth with a redirect, not a silent reload or page deletion."><div class="scenario-context"><p>A user leaves the dashboard open for a long time and the session expires. What behavior has this app already prepared for?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>If an API call returns 401, the browser is sent back to `login.php`</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>The repository automatically invents a new session</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>The UI permanently hides all buttons without explanation</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="c" data-correct-message="Right. CRUD-style resource dispatch makes this predictable." data-wrong-message="Try again. The clue is that the codebase already has a standard GET/POST/PUT/DELETE pattern."><div class="scenario-context"><p>You want to add a new `milestones` feature similar to categories and dreams. Which design would best fit the current project?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>Put all milestone logic inside one huge view template</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>Only handle milestones with client-side local storage</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>Create a public API entry file, controller, and repository that follow the same resource pattern</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-controls"><button class="btn btn-primary" data-check-quiz="quiz-4">Check Answers</button><button class="btn btn-secondary" data-reset-quiz="quiz-4">Try Again</button></div><div class="quiz-overall-feedback"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+        <section class="module" id="module-5">
+            <div class="module-content">
+                <header class="module-header animate-in">
+                    <span class="module-number">05</span>
+                    <div>
+                        <span class="module-kicker">Automatic History</span>
+                        <h1 class="module-title">Why Tasks And Habits Matter More Than They Seem</h1>
+                        <p class="module-subtitle">This module uses a scrapbook metaphor. Goals are the project pages, and tasks, habits, and manual logs keep gluing fresh evidence into the book. The analytics layer only exists because those evidence pieces keep arriving.</p>
+                    </div>
+                </header>
+                <div class="module-body">
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">One Checkbox Triggers More Than A Visual Change</h2>
+                        <p class="screen-intro">When you mark a task complete, the app is not just repainting a row. It may also create a new history entry so the activity calendar and day detail views can tell the story later.</p>
+                        <div class="flow-animation" id="taskFlow">
+                            <div class="flow-actors">
+                                <div class="flow-actor active" id="task-js"><div class="flow-actor-icon" style="background:var(--color-actor-1)">1</div><strong>`goals.js`</strong><p>Checkbox changed.</p></div>
+                                <div class="flow-actor" id="task-entry"><div class="flow-actor-icon" style="background:var(--color-actor-2)">2</div><strong>`goal-tasks.php`</strong><p>Routes the PUT request.</p></div>
+                                <div class="flow-actor" id="task-controller"><div class="flow-actor-icon" style="background:var(--color-actor-3)">3</div><strong>`GoalTaskController`</strong><p>Chooses toggle vs edit behavior.</p></div>
+                                <div class="flow-actor" id="task-service"><div class="flow-actor-icon" style="background:var(--color-actor-4)">4</div><strong>`GoalTrackingService`</strong><p>Updates the task and writes history in a transaction.</p></div>
+                                <div class="flow-actor" id="task-history"><div class="flow-actor-icon" style="background:var(--color-actor-5)">5</div><strong>`HistoryRepository`</strong><p>Saves the timeline entry.</p></div>
+                                <div class="flow-actor" id="task-refresh"><div class="flow-actor-icon" style="background:var(--color-accent)">6</div><strong>UI Refresh</strong><p>Tasks list and history panel reload.</p></div>
+                            </div>
+                            <div class="flow-label" id="taskFlowLabel">Click “Next Step” to watch one task completion travel through the system.</div>
+                            <div class="flow-controls"><button class="btn btn-primary" data-flow-next="taskFlow">Next Step</button><button class="btn btn-secondary" data-flow-reset="taskFlow">Restart</button><span id="taskFlowProgress">Step 0 / 6</span></div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code"><span class="translation-label">Code</span>
+<pre><code>public function update(int $taskId, array $input): array
+{
+    $this-&gt;auth-&gt;requireAuth();
+
+    try {
+        if (array_key_exists('is_completed', $input)) {
+            return $this-&gt;service-&gt;toggleTaskCompletion(
+                $this-&gt;auth-&gt;id(),
+                $taskId,
+                (bool) $input['is_completed'],
+                $input['completed_on'] ?? null
+            );
+        }
+
+        return $this-&gt;service-&gt;updateTask($this-&gt;auth-&gt;id(), $taskId, $input);
+    } catch (InvalidArgumentException $exception) {
+        return ['success' =&gt; false, 'message' =&gt; $exception-&gt;getMessage()];
+    }
+}</code></pre></div>
+                            <div class="translation-english"><span class="translation-label">Plain English</span><div class="translation-lines">
+                                <p class="tl">`GoalTaskController` is doing a subtle but useful trick here. The same endpoint can handle two different intentions: editing task text or toggling completion.</p>
+                                <p class="tl">It decides which path to use by checking whether the request includes `is_completed`.</p>
+                                <p class="tl">That keeps the API surface small while still supporting richer behavior.</p>
+                            </div></div>
+                        </div>
+                    </section>
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">The Real Prize Is The Timeline, Not The Task Row</h2>
+                        <p class="screen-intro">The project’s most interesting idea is that multiple actions feed the same history system. Manual notes, task completions, habit actions, and progress snapshots all become evidence the analytics layer can visualize.</p>
+                        <div class="pattern-cards">
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-1)">📝</div><h4 class="pattern-title">Manual log</h4><p>User types context or a progress update directly.</p></div>
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-2)">✅</div><h4 class="pattern-title">Task completion</h4><p>Completing a task can create a history entry automatically.</p></div>
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-3)">🔁</div><h4 class="pattern-title">Habit action</h4><p>Recording a repeatable action creates both a habit log and a history entry.</p></div>
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-4)">📈</div><h4 class="pattern-title">Progress snapshot</h4><p>A percentage update is stored so the chart can show change over time.</p></div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code"><span class="translation-label">Code</span>
+<pre><code>if ($completed) {
+    $entryDate = $this-&gt;normalizeDate($completedOn ?? 'now');
+    $this-&gt;historyRepository-&gt;createHistoryEntry([
+        'user_id' =&gt; $userId,
+        'entity_type' =&gt; 'goal',
+        'entity_id' =&gt; (int) $task['goal_id'],
+        'entry_type' =&gt; 'task_completion',
+        'title' =&gt; $task['title'],
+        'content' =&gt; $task['description'] ?? null,
+        'entry_date' =&gt; $entryDate,
+        'related_type' =&gt; 'goal_task',
+        'related_id' =&gt; $taskId,
+    ]);
+}</code></pre></div>
+                            <div class="translation-english"><span class="translation-label">Plain English</span><div class="translation-lines">
+                                <p class="tl">This is the hidden magic. The app is turning “task completed” into a reusable timeline event with type, title, date, and linkage back to the original task.</p>
+                                <p class="tl">Because of that, the history screens do not care whether activity came from a checkbox, a note field, or a habit button. They can visualize them all.</p>
+                                <p class="tl">That is a strong product design move, not just a code detail.</p>
+                            </div></div>
+                        </div>
+                        <div class="callout callout-accent"><div class="callout-icon">🧠</div><div><strong>Architecture Insight</strong><p>When multiple behaviors feed one shared timeline, you get analytics almost “for free” later. That pattern is worth asking AI to reuse in other products.</p></div></div>
+                        <div class="quiz-container" id="quiz-5">
+                            <p class="quiz-label">Module 5 Quiz</p>
+                            <div class="quiz-question-block" data-correct="c" data-correct-message="Exactly. The checkbox can create a history entry, which is why the analytics panels stay meaningful." data-wrong-message="The task row is only the visible surface. The deeper effect is that history can be updated too."><div class="scenario-context"><p>Why is task completion more important than just changing a checkbox color in this app?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>It only changes CSS and has no backend effect</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>It deletes the goal automatically</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>It can generate a history entry that feeds later analytics and day views</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="a" data-correct-message="Right. A shared history model lets different actions show up in one calendar and one feed." data-wrong-message="Think bigger than the immediate feature. The shared timeline is the scalable win here."><div class="scenario-context"><p>You want to add a “milestone reached” button next month. What existing design idea should you probably reuse?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>Create a new history entry type so the event flows into existing analytics</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>Hardcode the message directly into the dashboard HTML</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>Only change the button label in CSS</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="b" data-correct-message="Correct. The controller branches between a normal update and a completion toggle based on request shape." data-wrong-message="The controller is not randomly guessing. It looks for `is_completed` to choose the branch."><div class="scenario-context"><p>How does `GoalTaskController` know whether a PUT request means “edit task details” or “toggle completion”?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>It checks which browser tab the user has open</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>It checks whether `is_completed` exists in the input payload</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>It asks MySQL which action the user probably wanted</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-controls"><button class="btn btn-primary" data-check-quiz="quiz-5">Check Answers</button><button class="btn btn-secondary" data-reset-quiz="quiz-5">Try Again</button></div><div class="quiz-overall-feedback"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+        <section class="module" id="module-6">
+            <div class="module-content">
+                <header class="module-header animate-in">
+                    <span class="module-number">06</span>
+                    <div>
+                        <span class="module-kicker">Auth And Recovery</span>
+                        <h1 class="module-title">Sessions, Security Questions, And The Safety Rails Around The App</h1>
+                        <p class="module-subtitle">This module uses a nightclub metaphor. Authentication is the bouncer, the session is the wristband, and the recovery flow is a second ID check when the guest forgets the original pass.</p>
+                    </div>
+                </header>
+                <div class="module-body">
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">The Browser Does Some Validation, But The Server Makes The Final Decision</h2>
+                        <p class="screen-intro">`auth.js` gives fast feedback so the user is not guessing. But the backend still re-validates because browser checks are convenience, not security.</p>
+                        <div class="two-col">
+                            <div class="hero-card">
+                                <span class="section-kicker">Frontend Role</span><h3>`auth.js`</h3>
+                                <div class="step-cards">
+                                    <div class="step-card"><div class="step-num">1</div><div><strong>Trim input</strong><p>Removes accidental whitespace from emails and usernames.</p></div></div>
+                                    <div class="step-card"><div class="step-num">2</div><div><strong>Show field errors</strong><p>Marks specific inputs with messages like “passwords do not match.”</p></div></div>
+                                    <div class="step-card"><div class="step-num">3</div><div><strong>Submit async</strong><p>Sends the form to JSON endpoints without a full form-post refresh.</p></div></div>
+                                </div>
+                            </div>
+                            <div class="hero-card">
+                                <span class="section-kicker">Backend Role</span><h3>Handlers + `Auth.php`</h3>
+                                <div class="step-cards">
+                                    <div class="step-card"><div class="step-num">1</div><div><strong>Validate again</strong><p>Never trust the browser as the only gatekeeper.</p></div></div>
+                                    <div class="step-card"><div class="step-num">2</div><div><strong>Hash and verify passwords</strong><p>Passwords are compared using secure hashing, not plain text.</p></div></div>
+                                    <div class="step-card"><div class="step-num">3</div><div><strong>Create session state</strong><p>After successful login, the server stores `user_id` in the session.</p></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code"><span class="translation-label">Code</span>
+<pre><code>public function handle(array $input): array
+{
+    $username = trim($input['username'] ?? '');
+    $email = trim($input['email'] ?? '');
+    $password = $input['password'] ?? '';
+    $passwordConfirm = $input['password2'] ?? '';
+    $securityQuestions = $input['security_questions'] ?? '';
+
+    $validation = $this-&gt;validator-&gt;validateRegister($input);
+    if ($validation !== []) {
+        return ['success' =&gt; false] + $validation;
+    }
+
+    $result = $this-&gt;auth-&gt;register($username, $email, $password);</code></pre></div>
+                            <div class="translation-english"><span class="translation-label">Plain English</span><div class="translation-lines">
+                                <p class="tl">`RegisterHandler` pulls the important fields out of the request, normalizes them, and runs server-side validation before it even tries to create a user.</p>
+                                <p class="tl">That means the browser’s nice messages are not the only protection. The server repeats the important rules.</p>
+                                <p class="tl">This is a core security habit: user input gets checked again at the actual trust boundary.</p>
+                            </div></div>
+                        </div>
+                    </section>
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">Password Recovery Is A Three-Step Tunnel</h2>
+                        <p class="screen-intro">The forgot-password flow is more sophisticated than the login page. It first confirms the email, then loads the user’s saved security questions, then issues a temporary reset token stored in session state.</p>
+                        <div class="summary-band">
+                            <div class="hero-card"><span class="section-kicker">Step 1</span><h3>Email lookup</h3><p>The backend verifies the account exists and has enough recovery questions configured.</p></div>
+                            <div class="hero-card"><span class="section-kicker">Step 2</span><h3>Answer verification</h3><p>`SecurityQuestionHandler` checks two answers and then creates a temporary reset token in session memory.</p></div>
+                            <div class="hero-card"><span class="section-kicker">Step 3</span><h3>Password update</h3><p>`ResetPasswordHandler` validates the token, checks expiration, hashes the new password, and clears the token.</p></div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code"><span class="translation-label">Code</span>
+<pre><code>$token = bin2hex(random_bytes(32));
+$_SESSION['password_reset_token'] = $token;
+$_SESSION['password_reset_user_id'] = $userId;
+$_SESSION['password_reset_expires'] = time() + 3600;
+
+return [
+    'success' =&gt; true,
+    'message' =&gt; 'Answers verified',
+    'token' =&gt; $token
+];</code></pre></div>
+                            <div class="translation-english"><span class="translation-label">Plain English</span><div class="translation-lines">
+                                <p class="tl">After the answers are verified, the server creates a random reset token and stores it in the session along with the target user and expiry time.</p>
+                                <p class="tl">That token acts like a temporary backstage pass. It is only valid for a short window and only for this recovery session.</p>
+                                <p class="tl">You should notice one practical limitation too: the comment says this is session-based “for now,” which means a future production version might move reset tokens into the database.</p>
+                            </div></div>
+                        </div>
+                        <div class="callout callout-warning"><div class="callout-icon">🔍</div><div><strong>Real-World Gotcha</strong><p>The login view shows a “Remember for 30 days” checkbox, but the backend login flow does not use that value. That is the kind of mismatch you want to spot when reviewing AI-generated product polish.</p></div></div>
+                        <div class="quiz-container" id="quiz-6">
+                            <p class="quiz-label">Module 6 Quiz</p>
+                            <div class="quiz-question-block" data-correct="b" data-correct-message="Exactly. Client-side validation improves experience, but the server still has to enforce trust boundaries." data-wrong-message="The browser can help, but it cannot be the final security authority."><div class="scenario-context"><p>Why does the app validate registration data in both `auth.js` and the PHP handlers?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>Because duplicate validation always makes the app twice as fast</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>Because frontend validation is for user experience, while backend validation is for actual trust and security</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>Because PHP cannot read form data without JavaScript</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="c" data-correct-message="Right. The session is the server-side memory that remembers the logged-in user between requests." data-wrong-message="A password hash stores the password check. The session stores current login state."><div class="scenario-context"><p>In plain English, what is the session doing after a successful login?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>It redraws the CSS theme</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>It permanently stores the user’s password in the browser</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>It acts like server-side memory that keeps the user recognized across page requests</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="a" data-correct-message="Correct. The comment and design imply a temporary implementation that could evolve for production-hardening later." data-wrong-message="Look at what the token is stored in and how the code comments describe it."><div class="scenario-context"><p>What is the most useful architectural observation about the reset token flow?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>It currently stores temporary reset state in the session, which works locally but may be upgraded later for production</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>It eliminates the need for security questions entirely</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>It means the user can skip login forever</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-controls"><button class="btn btn-primary" data-check-quiz="quiz-6">Check Answers</button><button class="btn btn-secondary" data-reset-quiz="quiz-6">Try Again</button></div><div class="quiz-overall-feedback"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+        <section class="module" id="module-7">
+            <div class="module-content">
+                <header class="module-header animate-in">
+                    <span class="module-number">07</span>
+                    <div>
+                        <span class="module-kicker">Big Picture</span>
+                        <h1 class="module-title">How To Debug This Project And Give Better AI Instructions</h1>
+                        <p class="module-subtitle">Now zoom out. The best metaphor here is a detective board: symptoms, suspects, and routes. Once you know which actor owns which kind of problem, AI stops dragging you in circles.</p>
+                    </div>
+                </header>
+                <div class="module-body">
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">Use These Mental Paths When Something Breaks</h2>
+                        <p class="screen-intro">Most bugs in this project fall into one of three trails. Pick the right trail early and your debugging time drops fast.</p>
+                        <div class="pattern-cards">
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-1)">🖼</div><h4 class="pattern-title">Page looks wrong</h4><p>Check the view template, partials, CSS classes, and whether the right JS file is loaded.</p></div>
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-2)">📦</div><h4 class="pattern-title">Data is wrong</h4><p>Check the controller, repository, and database records behind the feature.</p></div>
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-3)">🔐</div><h4 class="pattern-title">Access is weird</h4><p>Check sessions, `Auth.php`, 401 handling, redirects, and API auth guards.</p></div>
+                            <div class="pattern-card"><div class="pattern-icon" style="background:var(--color-actor-4)">📊</div><h4 class="pattern-title">Analytics feel empty</h4><p>Check whether history entries and progress snapshots are being created upstream.</p></div>
+                        </div>
+                        <div class="translation-block">
+                            <div class="translation-code"><span class="translation-label">Code</span>
+<pre><code>public function createManualEntry(int $userId, array $data): array
+{
+    $entityType = $this-&gt;normalizeEntityType($data['entity_type'] ?? '');
+    $entityId = (int) ($data['entity_id'] ?? 0);
+    $entryDate = $this-&gt;normalizeDate($data['entry_date'] ?? 'now');
+    $note = trim((string) ($data['note'] ?? ''));
+    $progressPercent = $this-&gt;normalizeOptionalProgress($data['progress_percent'] ?? null);
+
+    if ($entityId &lt;= 0) {
+        return ['success' =&gt; false, 'message' =&gt; 'Select a valid goal or dream.'];
+    }
+
+    if ($note === '' &amp;&amp; $progressPercent === null) {
+        return ['success' =&gt; false, 'message' =&gt; 'Add a note or a progress update before saving the entry.'];
+    }</code></pre></div>
+                            <div class="translation-english"><span class="translation-label">Plain English</span><div class="translation-lines">
+                                <p class="tl">`HistoryService` is doing the boring, valuable work of normalization and guardrails. It turns loose request data into clean values and rejects impossible entries early.</p>
+                                <p class="tl">That is exactly what you want a service layer to do: protect the deeper system from junk input.</p>
+                                <p class="tl">If a history bug appears, this is one of the first places to inspect because it sits right at the decision boundary.</p>
+                            </div></div>
+                        </div>
+                        <div class="callout callout-info"><div class="callout-icon">🗣</div><div><strong>Prompt Upgrade</strong><p>Instead of telling AI “fix the history bug,” say “trace `public/assets/js/history.js` to `public/api/history.php`, then inspect `HistoryController`, `HistoryService`, and `HistoryRepository` for why day details are empty.” That is a dramatically stronger prompt.</p></div></div>
+                    </section>
+                    <section class="screen animate-in">
+                        <h2 class="screen-heading">What This App Is Good At Architecturally</h2>
+                        <p class="screen-intro">You do not need to become an engineer to see the strengths. You just need to see the recurring patterns clearly enough to guide changes.</p>
+                        <div class="compare-grid">
+                            <div class="compare-card"><h3>Strengths</h3><div class="entity-pill-row"><span class="entity-pill">thin public entry points</span><span class="entity-pill">central bootstrap</span><span class="entity-pill">shared auth manager</span><span class="entity-pill">repository separation</span><span class="entity-pill">server-rendered simplicity</span><span class="entity-pill">shared history layer</span></div></div>
+                            <div class="compare-card"><h3>Watch-outs</h3><div class="entity-pill-row"><span class="entity-pill">duplicated project snapshots in repo</span><span class="entity-pill">some UX text implies behavior not fully wired</span><span class="entity-pill">history and analytics rely on upstream writes staying healthy</span><span class="entity-pill">session-based reset token is pragmatic but basic</span></div></div>
+                        </div>
+                        <div class="hero-card" style="margin-top:var(--space-6)">
+                            <span class="section-kicker">Use This When Prompting AI</span>
+                            <div class="icon-rows">
+                                <div class="icon-row"><div class="icon-circle" style="background:var(--color-actor-1)">1</div><div><strong>Name the layer</strong><p>“Update the goal repository query” beats “change the goal stuff.”</p></div></div>
+                                <div class="icon-row"><div class="icon-circle" style="background:var(--color-actor-2)">2</div><div><strong>Name the flow</strong><p>“From `goals.js` through `GoalTaskController` into history” gives AI a route to follow.</p></div></div>
+                                <div class="icon-row"><div class="icon-circle" style="background:var(--color-actor-3)">3</div><div><strong>Name the outcome</strong><p>Ask for the user-visible behavior and the persistence behavior together, not just the UI change.</p></div></div>
+                            </div>
+                        </div>
+                        <div class="quiz-container" id="quiz-7">
+                            <p class="quiz-label">Module 7 Quiz</p>
+                            <div class="quiz-question-block" data-correct="a" data-correct-message="Exactly. That prompt gives AI the right actors and the right route." data-wrong-message="The stronger prompt names the flow, not just the symptom."><div class="scenario-context"><p>You click a day in the history modal and the day details are empty even though the calendar shows activity. Which AI prompt is strongest?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>Trace `history.js` → `public/api/history.php` → `HistoryController` → `HistoryService` → `HistoryRepository` for why day entries are missing</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>Fix the page because it is broken somehow</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>Rewrite the app in a frontend framework</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="b" data-correct-message="Correct. Empty analytics often mean the upstream event-writing path is failing." data-wrong-message="Think upstream. Charts depend on history and snapshot writes happening earlier."><div class="scenario-context"><p>The charts are empty, but the page still renders. What class of problem should you suspect first?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>Only typography issues</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>History entries or progress snapshots are not being created upstream</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>The nav dots are not centered</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-question-block" data-correct="c" data-correct-message="Yes. The architectural center of gravity here is server-rendered pages enhanced by JavaScript, not a client-side app with PHP pretending to help." data-wrong-message="A few fetch calls do not automatically make something a single-page app."><div class="scenario-context"><p>If you had to describe this project to another engineer in one sentence, what would be most accurate?</p></div><div class="quiz-options"><button class="quiz-option" data-value="a"><span class="quiz-option-radio"></span><span>A pure frontend app that occasionally uses PHP for storage</span></button><button class="quiz-option" data-value="b"><span class="quiz-option-radio"></span><span>A database-first analytics engine with almost no templates</span></button><button class="quiz-option" data-value="c"><span class="quiz-option-radio"></span><span>A server-rendered PHP app with modular controllers, repositories, and lightweight JavaScript enhancements</span></button></div><div class="quiz-feedback"></div></div>
+                            <div class="quiz-controls"><button class="btn btn-primary" data-check-quiz="quiz-7">Check Answers</button><button class="btn btn-secondary" data-reset-quiz="quiz-7">Try Again</button></div><div class="quiz-overall-feedback"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </main>
+    <div class="footer-note">Built from the actual project structure, code paths, and feature flow of Progression Tracker.</div>
+    <script>
+        (() => {
+            const modules = Array.from(document.querySelectorAll('.module'));
+            const navDots = Array.from(document.querySelectorAll('.nav-dot'));
+            const progressBar = document.getElementById('progressBar');
+            let scrollFrame = 0;
+            function updateProgressBar(){const s=window.scrollY;const h=document.documentElement.scrollHeight-window.innerHeight;const p=h>0?(s/h)*100:0;progressBar.style.width=`${p}%`;progressBar.setAttribute('aria-valuenow',String(Math.round(p)))} 
+            function updateNavState(){const middle=window.innerHeight*.45;let currentIndex=0;modules.forEach((module,index)=>{const rect=module.getBoundingClientRect();if(rect.top<=middle&&rect.bottom>=middle){currentIndex=index}});navDots.forEach((dot,index)=>{dot.classList.toggle('current',index===currentIndex);dot.classList.toggle('visited',index<currentIndex)})}
+            window.addEventListener('scroll',()=>{window.cancelAnimationFrame(scrollFrame);scrollFrame=window.requestAnimationFrame(()=>{updateProgressBar();updateNavState()})},{passive:true});
+            navDots.forEach((dot)=>dot.addEventListener('click',()=>document.getElementById(dot.dataset.target)?.scrollIntoView({behavior:'smooth',block:'start'})));
+            document.addEventListener('keydown',(event)=>{if(['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName)){return}const currentIndex=navDots.findIndex((dot)=>dot.classList.contains('current'));if(event.key==='ArrowDown'||event.key==='ArrowRight'){modules[Math.min(modules.length-1,currentIndex+1)]?.scrollIntoView({behavior:'smooth'});event.preventDefault()}if(event.key==='ArrowUp'||event.key==='ArrowLeft'){modules[Math.max(0,currentIndex-1)]?.scrollIntoView({behavior:'smooth'});event.preventDefault()}});
+            const observer=new IntersectionObserver((entries)=>{entries.forEach((entry)=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}})},{rootMargin:'0px 0px -10% 0px',threshold:.1});document.querySelectorAll('.animate-in').forEach((el)=>observer.observe(el));
+            let activeTooltip=null;function positionTooltip(term,tip){const rect=term.getBoundingClientRect();document.body.appendChild(tip);const tipRect=tip.getBoundingClientRect();let left=rect.left+(rect.width/2)-(tipRect.width/2);left=Math.max(8,Math.min(left,window.innerWidth-tipRect.width-8));tip.style.left=`${left}px`;if(rect.top-tipRect.height-8<0){tip.style.top=`${rect.bottom+8}px`;tip.classList.add('flip')}else{tip.style.top=`${rect.top-tipRect.height-8}px`;tip.classList.remove('flip')}}document.querySelectorAll('.term').forEach((term)=>{const tip=document.createElement('span');tip.className='term-tooltip';tip.textContent=term.dataset.definition;const showTip=()=>{if(activeTooltip&&activeTooltip!==tip){activeTooltip.classList.remove('visible');activeTooltip.remove()}term.classList.add('active');positionTooltip(term,tip);requestAnimationFrame(()=>tip.classList.add('visible'));activeTooltip=tip};const hideTip=()=>{term.classList.remove('active');tip.classList.remove('visible');setTimeout(()=>{if(!tip.classList.contains('visible')){tip.remove()}},150);if(activeTooltip===tip){activeTooltip=null}};term.addEventListener('mouseenter',showTip);term.addEventListener('mouseleave',hideTip);term.addEventListener('click',(event)=>{event.stopPropagation();if(tip.classList.contains('visible')){hideTip()}else{showTip()}})});document.addEventListener('click',()=>{if(activeTooltip){activeTooltip.classList.remove('visible');activeTooltip.remove();activeTooltip=null;document.querySelectorAll('.term.active').forEach((term)=>term.classList.remove('active'))}});
+            document.querySelectorAll('.arch-component').forEach((button)=>button.addEventListener('click',()=>{document.querySelectorAll('.arch-component').forEach((item)=>item.classList.remove('active'));button.classList.add('active');const target=document.getElementById('archDescription');if(target){target.textContent=button.dataset.archDesc||''}}));
+            document.querySelectorAll('.quiz-option').forEach((button)=>button.addEventListener('click',()=>{const block=button.closest('.quiz-question-block');if(!block||block.dataset.locked==='true'){return}block.querySelectorAll('.quiz-option').forEach((option)=>option.classList.remove('selected'));button.classList.add('selected')}));
+            function checkQuiz(id){const container=document.getElementById(id);if(!container){return}const blocks=Array.from(container.querySelectorAll('.quiz-question-block'));let correct=0;let answered=0;blocks.forEach((block)=>{const selected=block.querySelector('.quiz-option.selected');const feedback=block.querySelector('.quiz-feedback');const correctValue=block.dataset.correct;block.querySelectorAll('.quiz-option').forEach((option)=>option.classList.remove('correct','incorrect'));if(!selected){feedback.textContent='Pick an answer first.';feedback.className='quiz-feedback show error';return}answered+=1;block.dataset.locked='true';block.querySelectorAll('.quiz-option').forEach((option)=>option.disabled=true);const correctOption=block.querySelector(`.quiz-option[data-value="${correctValue}"]`);if(selected.dataset.value===correctValue){correct+=1;selected.classList.add('correct');feedback.innerHTML=`<strong>Exactly.</strong> ${block.dataset.correctMessage}`;feedback.className='quiz-feedback show success'}else{selected.classList.add('incorrect');correctOption?.classList.add('correct');feedback.innerHTML=`<strong>Not quite.</strong> ${block.dataset.wrongMessage}`;feedback.className='quiz-feedback show error'}});const overall=container.querySelector('.quiz-overall-feedback');if(!overall){return}if(answered!==blocks.length){overall.textContent='Answer every question before checking the quiz.';overall.className='quiz-overall-feedback show error';return}const remaining=blocks.length-correct;overall.textContent=remaining===0?'Strong read. You are tracing this app the way an engineer would.':`You got ${correct} of ${blocks.length}. The misses are the useful part: they show which layer to revisit.`;overall.className=`quiz-overall-feedback show ${remaining===0?'success':'error'}`}
+            function resetQuiz(id){const container=document.getElementById(id);if(!container){return}container.querySelectorAll('.quiz-question-block').forEach((block)=>{delete block.dataset.locked;block.querySelectorAll('.quiz-option').forEach((option)=>{option.disabled=false;option.classList.remove('selected','correct','incorrect')});const feedback=block.querySelector('.quiz-feedback');feedback.textContent='';feedback.className='quiz-feedback'});const overall=container.querySelector('.quiz-overall-feedback');if(overall){overall.textContent='';overall.className='quiz-overall-feedback'}}
+            document.querySelectorAll('[data-check-quiz]').forEach((button)=>button.addEventListener('click',()=>checkQuiz(button.dataset.checkQuiz)));document.querySelectorAll('[data-reset-quiz]').forEach((button)=>button.addEventListener('click',()=>resetQuiz(button.dataset.resetQuiz)));
+            const chatActors={'actor-1':{label:'J',color:'var(--color-actor-1)'},'actor-2':{label:'A',color:'var(--color-actor-2)'},'actor-3':{label:'P',color:'var(--color-actor-3)'},'actor-4':{label:'C',color:'var(--color-actor-4)'},'actor-5':{label:'M',color:'var(--color-actor-5)'}};const chatState={};function getChatState(id){if(!chatState[id]){chatState[id]={index:0,timer:null}}return chatState[id]}function updateChatProgress(id){const chat=document.getElementById(id);if(!chat){return}const messages=Array.from(chat.querySelectorAll('.chat-message'));const progress=chat.querySelector('.chat-progress');const state=getChatState(id);if(progress){progress.textContent=`${state.index} / ${messages.length} messages`}}function playChatNext(id){const chat=document.getElementById(id);if(!chat){return}const state=getChatState(id);const messages=Array.from(chat.querySelectorAll('.chat-message'));const typing=chat.querySelector('.chat-typing');const avatar=chat.querySelector('[data-chat-avatar]');if(state.index>=messages.length){return}const message=messages[state.index];const sender=message.dataset.sender;if(typing&&avatar&&chatActors[sender]){avatar.textContent=chatActors[sender].label;avatar.style.background=chatActors[sender].color;typing.hidden=false}window.clearTimeout(state.timer);state.timer=window.setTimeout(()=>{if(typing){typing.hidden=true}message.hidden=false;state.index+=1;updateChatProgress(id)},800)}function playChatAll(id){const state=getChatState(id);const loop=()=>{const chat=document.getElementById(id);if(!chat){return}const messages=Array.from(chat.querySelectorAll('.chat-message'));if(state.index>=messages.length){return}playChatNext(id);state.timer=window.setTimeout(loop,1200)};loop()}function resetChat(id){const chat=document.getElementById(id);if(!chat){return}const state=getChatState(id);window.clearTimeout(state.timer);state.index=0;chat.querySelectorAll('.chat-message').forEach((message)=>message.hidden=true);const typing=chat.querySelector('.chat-typing');if(typing){typing.hidden=true}updateChatProgress(id)}document.querySelectorAll('[data-chat-next]').forEach((button)=>button.addEventListener('click',()=>playChatNext(button.dataset.chatNext)));document.querySelectorAll('[data-chat-play]').forEach((button)=>button.addEventListener('click',()=>playChatAll(button.dataset.chatPlay)));document.querySelectorAll('[data-chat-reset]').forEach((button)=>button.addEventListener('click',()=>resetChat(button.dataset.chatReset)));
+            const flows={pageFlow:{actors:['page-browser','page-public','page-auth','page-repo','page-view','page-js'],labels:['The browser asks for `dashboard.php`.','The public entry file boots shared code and prepares the request.','`require_auth_user()` checks whether the session belongs to a logged-in user.','`DashboardRepository` runs count queries for dreams, goals, streaks, and achievements.','The dashboard view prints HTML using the data it received.','Once HTML reaches the browser, `history.js` and friends enhance the experience.'],progressId:'pageFlowProgress',labelId:'pageFlowLabel',index:0},taskFlow:{actors:['task-js','task-entry','task-controller','task-service','task-history','task-refresh'],labels:['`goals.js` sees the checkbox change and sends a PUT request.','`public/api/goal-tasks.php` routes the request by method and ID.','`GoalTaskController` spots `is_completed` and chooses the toggle path.','`GoalTrackingService` updates the task and opens a database transaction.','`HistoryRepository` writes a `task_completion` entry so the timeline can remember what happened.','The UI reloads tasks and refreshes the history panel, so the evidence appears immediately.'],progressId:'taskFlowProgress',labelId:'taskFlowLabel',index:0}};function setFlowState(id,nextIndex){const flow=flows[id];if(!flow){return}flow.index=nextIndex;flow.actors.forEach((actorId,index)=>document.getElementById(actorId)?.classList.toggle('active',index===Math.max(0,flow.index-1)));const label=document.getElementById(flow.labelId);const progress=document.getElementById(flow.progressId);if(label){label.textContent=flow.index===0?'Click “Next Step” to begin.':flow.labels[flow.index-1]}if(progress){progress.textContent=`Step ${flow.index} / ${flow.actors.length}`}}function nextFlowStep(id){const flow=flows[id];if(!flow||flow.index>=flow.actors.length){return}setFlowState(id,flow.index+1)}function resetFlow(id){const flow=flows[id];if(!flow){return}flow.actors.forEach((actorId,index)=>document.getElementById(actorId)?.classList.toggle('active',index===0));flow.index=0;const label=document.getElementById(flow.labelId);if(label){label.textContent=id==='pageFlow'?'Click “Next Step” to trace the dashboard load.':'Click “Next Step” to watch one task completion travel through the system.'}const progress=document.getElementById(flow.progressId);if(progress){progress.textContent=`Step 0 / ${flow.actors.length}`}}document.querySelectorAll('[data-flow-next]').forEach((button)=>button.addEventListener('click',()=>nextFlowStep(button.dataset.flowNext)));document.querySelectorAll('[data-flow-reset]').forEach((button)=>button.addEventListener('click',()=>resetFlow(button.dataset.flowReset)));
+            resetChat('apiChat');resetFlow('pageFlow');resetFlow('taskFlow');updateProgressBar();updateNavState();
+        })();
+    </script>
+</body>
+</html>

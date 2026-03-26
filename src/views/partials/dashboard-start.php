@@ -19,7 +19,7 @@
         <script defer src="<?= safe_output(asset_url('assets/js/' . $script)) ?>"></script>
     <?php endforeach; ?>
 </head>
-<body data-page="<?= safe_output($pageId) ?>">
+<body data-page="<?= safe_output($pageId) ?>" data-app-timezone="<?= safe_output((string) config('app.timezone', 'UTC')) ?>">
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="dashboard-container">
         <aside class="sidebar" aria-label="Workspace">
@@ -35,7 +35,7 @@
                     <li><a href="dreams.php" class="nav-link<?= $activePage === 'dreams' ? ' active' : '' ?>"<?= $activePage === 'dreams' ? ' aria-current="page"' : '' ?>>Dreams</a></li>
                     <li><a href="goals.php" class="nav-link<?= $activePage === 'goals' ? ' active' : '' ?>"<?= $activePage === 'goals' ? ' aria-current="page"' : '' ?>>Goals</a></li>
                     <li><a href="categories.php" class="nav-link<?= $activePage === 'categories' ? ' active' : '' ?>"<?= $activePage === 'categories' ? ' aria-current="page"' : '' ?>>Categories</a></li>
-                    <li><a href="logs.php" class="nav-link<?= $activePage === 'logs' ? ' active' : '' ?>"<?= $activePage === 'logs' ? ' aria-current="page"' : '' ?>>Logs</a></li>
+                    <li><a href="logs.php" class="nav-link<?= $activePage === 'logs' ? ' active' : '' ?>"<?= $activePage === 'logs' ? ' aria-current="page"' : '' ?>>Weekly Review</a></li>
                 </ul>
                 <div class="nav-bottom">
                     <a href="logout.php" class="nav-link logout">Exit Node</a>
@@ -44,3 +44,4 @@
         </aside>
         <main class="main-content" id="main-content" tabindex="-1">
             <div class="page-feedback" id="pageFeedback" role="status" hidden aria-live="polite"></div>
+

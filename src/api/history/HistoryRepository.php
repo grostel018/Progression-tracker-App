@@ -193,6 +193,62 @@ class HistoryRepository
         return $stmt->fetchAll();
     }
 
+    public function getEntryTypeCounts(int $userId, string $startDate, string $endDate): array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT entry_type, COUNT(*) AS entry_count
+             FROM history_entries
+             WHERE user_id = ? AND entry_date BETWEEN ? AND ?
+             GROUP BY entry_type'
+        );
+        $stmt->execute([$userId, $startDate, $endDate]);
+
+        $counts = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $counts[(string) $row['entry_type']] = (int) $row['entry_count'];
+        }
+
+        return $counts;
+    }
+
+    public function getEntityActivitySummary(int $userId, string $startDate, string $endDate): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT
+                he.entity_type,
+                he.entity_id,
+                COUNT(*) AS entry_count,
+                MAX(he.entry_date) AS last_entry_date,
+                CASE WHEN he.entity_type = 'goal' THEN g.title ELSE d.title END AS entity_title,
+                CASE WHEN he.entity_type = 'goal' THEN g.status ELSE d.status END AS entity_status,
+                CASE WHEN he.entity_type = 'goal' THEN g.current_progress_percent ELSE d.current_progress_percent END AS current_progress_percent
+             FROM history_entries he
+             LEFT JOIN goals g
+                ON he.entity_type = 'goal'
+                AND g.id = he.entity_id
+                AND g.user_id = he.user_id
+             LEFT JOIN dreams d
+                ON he.entity_type = 'dream'
+                AND d.id = he.entity_id
+                AND d.user_id = he.user_id
+             WHERE he.user_id = ?
+                AND he.entry_date BETWEEN ? AND ?
+             GROUP BY
+                he.entity_type,
+                he.entity_id,
+                g.title,
+                d.title,
+                g.status,
+                d.status,
+                g.current_progress_percent,
+                d.current_progress_percent
+             ORDER BY entry_count DESC, last_entry_date DESC, he.entity_type ASC, he.entity_id ASC"
+        );
+        $stmt->execute([$userId, $startDate, $endDate]);
+
+        return $stmt->fetchAll();
+    }
+
     public function getDayEntries(int $userId, string $entryDate, ?string $entityType = null, ?int $entityId = null): array
     {
         $params = [$userId, $entryDate];
@@ -280,3 +336,4 @@ class HistoryRepository
         return [$where, $params];
     }
 }
+

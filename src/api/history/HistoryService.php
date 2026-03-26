@@ -38,6 +38,96 @@ class HistoryService
         ];
     }
 
+    public function getWeeklyReview(int $userId): array
+    {
+        [, $range] = $this->resolveRange('week', true);
+        $heatmap = $this->buildHeatmap($userId, $range['start'], $range['end']);
+        $progress = $this->buildProgressSeries($userId, $range['start'], $range['end']);
+        $entryTypeCounts = $this->historyRepository->getEntryTypeCounts($userId, $range['start'], $range['end']);
+        $entityActivity = $this->historyRepository->getEntityActivitySummary($userId, $range['start'], $range['end']);
+        $availableEntities = $this->buildAvailableEntities($userId);
+
+        $topEntities = array_slice(array_map(static function (array $entity): array {
+            return [
+                'entity_type' => (string) $entity['entity_type'],
+                'entity_id' => (int) $entity['entity_id'],
+                'title' => (string) ($entity['entity_title'] ?? 'Tracked item'),
+                'status' => (string) ($entity['entity_status'] ?? 'active'),
+                'current_progress_percent' => (int) ($entity['current_progress_percent'] ?? 0),
+                'entry_count' => (int) ($entity['entry_count'] ?? 0),
+                'last_entry_date' => $entity['last_entry_date'] ?? null,
+            ];
+        }, $entityActivity), 0, 5);
+
+        $activeEntityKeys = [];
+        foreach ($entityActivity as $entity) {
+            $activeEntityKeys[$entity['entity_type'] . ':' . $entity['entity_id']] = true;
+        }
+
+        $staleEntities = [];
+        foreach (['goal' => $availableEntities['goals'], 'dream' => $availableEntities['dreams']] as $entityType => $entities) {
+            foreach ($entities as $entity) {
+                $entityKey = $entityType . ':' . $entity['id'];
+                $status = (string) ($entity['status'] ?? 'active');
+
+                if (isset($activeEntityKeys[$entityKey]) || !in_array($status, ['active', 'paused'], true)) {
+                    continue;
+                }
+
+                $staleEntities[] = [
+                    'entity_type' => $entityType,
+                    'entity_id' => (int) $entity['id'],
+                    'title' => (string) $entity['title'],
+                    'status' => $status,
+                    'current_progress_percent' => (int) ($entity['current_progress_percent'] ?? 0),
+                ];
+            }
+        }
+
+        usort($staleEntities, static function (array $left, array $right): int {
+            return [$right['current_progress_percent'], $left['title']]
+                <=> [$left['current_progress_percent'], $right['title']];
+        });
+
+        $progressPoints = $progress['points'];
+        $progressShift = 0;
+        if (count($progressPoints) >= 2) {
+            $progressShift = (int) end($progressPoints)['progress_percent'] - (int) $progressPoints[0]['progress_percent'];
+            reset($progressPoints);
+        }
+
+        $busiestDay = null;
+        foreach ($heatmap['cells'] as $cell) {
+            if (($cell['count'] ?? 0) <= 0) {
+                continue;
+            }
+
+            if ($busiestDay === null || $cell['count'] > $busiestDay['count']) {
+                $busiestDay = [
+                    'date' => $cell['date'],
+                    'count' => (int) $cell['count'],
+                ];
+            }
+        }
+
+        return [
+            'range' => $range,
+            'summary' => [
+                'active_days' => (int) $heatmap['active_days'],
+                'total_entries' => (int) $heatmap['total_entries'],
+                'task_completions' => (int) ($entryTypeCounts['task_completion'] ?? 0),
+                'habit_actions' => (int) ($entryTypeCounts['habit_action'] ?? 0),
+                'manual_logs' => (int) ($entryTypeCounts['manual_log'] ?? 0),
+                'progress_points' => count($progressPoints),
+                'progress_shift' => $progressShift,
+                'active_item_count' => count($entityActivity),
+                'busiest_day' => $busiestDay,
+            ],
+            'wins' => $topEntities,
+            'stale_entities' => array_slice($staleEntities, 0, 5),
+        ];
+    }
+
     public function getEntityOverview(int $userId, string $entityType, int $entityId, string $rangeKey): array
     {
         [$normalizedRangeKey, $range] = $this->resolveRange($rangeKey, false);
@@ -357,3 +447,4 @@ class HistoryService
         };
     }
 }
+

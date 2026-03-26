@@ -14,6 +14,11 @@ $input = request_input();
 
 switch (request_method()) {
     case 'GET':
+        if ($mode === 'weekly-review') {
+            json_response($controller->weeklyReview());
+            return;
+        }
+
         if ($mode === 'day') {
             json_response($controller->day($_GET));
             return;
@@ -29,3 +34,4 @@ switch (request_method()) {
     default:
         json_response(['success' => false, 'message' => 'Method not allowed.'], 405);
 }
+

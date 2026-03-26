@@ -14,26 +14,29 @@ class GoalHabitRepository
         $this->db = Database::getConnection();
     }
 
-    public function listByGoal(int $userId, int $goalId): array
+    public function listByGoal(int $userId, int $goalId, string $todayDate): array
     {
         $stmt = $this->db->prepare(
             'SELECT gh.*, 
                     (
                         SELECT COUNT(*)
                         FROM goal_habit_logs ghl_today
-                        WHERE ghl_today.habit_id = gh.id AND ghl_today.logged_on = CURDATE()
+                        WHERE ghl_today.habit_id = gh.id
+                            AND ghl_today.user_id = gh.user_id
+                            AND ghl_today.logged_on = ?
                     ) AS today_actions,
                     (
                         SELECT COUNT(*)
                         FROM goal_habit_logs ghl_total
                         WHERE ghl_total.habit_id = gh.id
+                            AND ghl_total.user_id = gh.user_id
                     ) AS total_actions
              FROM goal_habits gh
              JOIN goals g ON g.id = gh.goal_id
              WHERE gh.goal_id = ? AND gh.user_id = ? AND g.user_id = ?
              ORDER BY gh.sort_order ASC, gh.created_at ASC'
         );
-        $stmt->execute([$goalId, $userId, $userId]);
+        $stmt->execute([$todayDate, $goalId, $userId, $userId]);
         return $stmt->fetchAll();
     }
 

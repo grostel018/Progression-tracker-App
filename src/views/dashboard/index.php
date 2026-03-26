@@ -57,7 +57,7 @@ include __DIR__ . '/../partials/dashboard-start.php';
 <section class="dashboard-content">
     <div class="panel analytics-shell dashboard-history-shell" id="dashboardHistory" data-history-scope="dashboard" data-default-range="year">
         <div class="analytics-head">
-            <div>
+            <div class="analytics-head-copy">
                 <p class="section-kicker">History</p>
                 <h2>Activity Overview</h2>
                 <p>Daily activity across goals and dreams, with progress snapshots over time.</p>
@@ -71,7 +71,9 @@ include __DIR__ . '/../partials/dashboard-start.php';
         <div class="analytics-grid">
             <section class="analytics-panel">
                 <div class="analytics-panel-head">
-                    <h3>Activity Calendar</h3>
+                    <div class="analytics-panel-copy">
+                        <h3>Activity Calendar</h3>
+                    </div>
                     <button type="button" class="btn-action btn-secondary history-log-trigger">Add Entry</button>
                 </div>
                 <div class="heatmap-mount" data-role="heatmap">
@@ -80,8 +82,10 @@ include __DIR__ . '/../partials/dashboard-start.php';
             </section>
             <section class="analytics-panel">
                 <div class="analytics-panel-head">
-                    <h3>Progress Trend</h3>
-                    <span class="analytics-caption">Average snapshot trend across tracked items.</span>
+                    <div class="analytics-panel-copy">
+                        <h3>Progress Trend</h3>
+                        <span class="analytics-caption">Average snapshot trend across tracked items.</span>
+                    </div>
                 </div>
                 <div class="chart-mount" data-role="chart">
                     <p class="panel-empty-copy">Loading progress trend…</p>

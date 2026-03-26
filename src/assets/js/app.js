@@ -67,8 +67,24 @@ function clearPageMessage() {
     setMessage(getPageFeedback(), '');
 }
 
+function getAppTimeZone() {
+    return document.body?.dataset.appTimezone || 'UTC';
+}
+
 function todayIso() {
-    return new Date().toISOString().split('T')[0];
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: getAppTimeZone(),
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+
+    const parts = formatter.formatToParts(new Date());
+    const year = parts.find((part) => part.type === 'year')?.value || '0000';
+    const month = parts.find((part) => part.type === 'month')?.value || '01';
+    const day = parts.find((part) => part.type === 'day')?.value || '01';
+
+    return `${year}-${month}-${day}`;
 }
 
 function humanizeLabel(value) {
@@ -260,6 +276,7 @@ window.dashboardApp = {
     clearPageMessage,
     closeCollapsible,
     humanizeLabel,
+    getAppTimeZone,
     openCollapsible,
     reloadOnSuccess,
     requestInlineConfirmation,

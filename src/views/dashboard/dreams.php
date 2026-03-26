@@ -116,7 +116,7 @@ include __DIR__ . '/../partials/dashboard-start.php';
 <?php if (!empty($dreams)): ?>
     <section class="workspace-panel entity-workspace" id="dreamWorkspace">
         <div class="workspace-head">
-            <div>
+            <div class="workspace-head-copy">
                 <p class="section-kicker">Selected Dream</p>
                 <h2 id="dreamWorkspaceTitle">Select a dream</h2>
                 <p class="workspace-copy" id="dreamWorkspaceMeta">Choose a dream card to inspect its history and progress trend.</p>
@@ -134,7 +134,7 @@ include __DIR__ . '/../partials/dashboard-start.php';
         </div>
         <section class="entity-history-panel" id="dreamHistoryPanel" data-history-scope="dream" data-default-range="30d" data-entity-label="dream">
             <div class="entity-history-head">
-                <div>
+                <div class="analytics-head-copy">
                     <p class="section-kicker">History</p>
                     <h4>Activity And Progress</h4>
                 </div>
@@ -148,7 +148,9 @@ include __DIR__ . '/../partials/dashboard-start.php';
             <div class="entity-history-grid">
                 <section class="analytics-panel">
                     <div class="analytics-panel-head">
-                        <h5>Calendar</h5>
+                        <div class="analytics-panel-copy">
+                            <h5>Calendar</h5>
+                        </div>
                         <button type="button" class="btn-action btn-secondary history-log-trigger" disabled>Add Log</button>
                     </div>
                     <div class="heatmap-mount" data-role="heatmap">
@@ -157,8 +159,10 @@ include __DIR__ . '/../partials/dashboard-start.php';
                 </section>
                 <section class="analytics-panel">
                     <div class="analytics-panel-head">
-                        <h5>Progress</h5>
-                        <span class="analytics-caption">Manual progress snapshots.</span>
+                        <div class="analytics-panel-copy">
+                            <h5>Progress</h5>
+                            <span class="analytics-caption">Manual progress snapshots.</span>
+                        </div>
                     </div>
                     <div class="chart-mount" data-role="chart">
                         <p class="panel-empty-copy">Select a dream to load its progress timeline.</p>
