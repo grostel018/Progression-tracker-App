@@ -111,6 +111,11 @@ class AuthInputValidator
 
         if (strlen($password) < $this->passwordMinLength) {
             $errors['password'] = sprintf('Password must be at least %d characters', $this->passwordMinLength);
+            return;
+        }
+
+        if (!preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
+            $errors['password'] = 'Password must include at least one letter and one number';
         }
     }
 

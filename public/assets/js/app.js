@@ -1,12 +1,23 @@
+function getCsrfToken() {
+    return document.body?.dataset.csrfToken || '';
+}
+
 async function apiRequest(endpoint, options = {}) {
     try {
+        const headers = {
+            Accept: 'application/json',
+            ...options.headers,
+        };
+
+        const csrfToken = getCsrfToken();
+        if (csrfToken) {
+            headers['X-CSRF-Token'] = csrfToken;
+        }
+
         const response = await fetch(endpoint, {
             credentials: 'include',
             ...options,
-            headers: {
-                Accept: 'application/json',
-                ...options.headers,
-            },
+            headers,
         });
 
         if (response.status === 401) {
@@ -275,6 +286,7 @@ window.dashboardApp = {
     bindDeleteButtons,
     clearPageMessage,
     closeCollapsible,
+    getCsrfToken,
     humanizeLabel,
     getAppTimeZone,
     openCollapsible,

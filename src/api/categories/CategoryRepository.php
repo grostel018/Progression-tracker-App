@@ -38,6 +38,13 @@ class CategoryRepository
         return $stmt->fetch();
     }
 
+    public function isOwnedByUser(int $id, int $userId): bool
+    {
+        $stmt = $this->db->prepare('SELECT 1 FROM categories WHERE id = ? AND user_id = ? LIMIT 1');
+        $stmt->execute([$id, $userId]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     public function create(array $data): int
     {
         $stmt = $this->db->prepare(

@@ -206,35 +206,18 @@ CREATE TABLE sessions (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
--- SECURITY QUESTIONS (for password reset)
-CREATE TABLE security_questions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    question VARCHAR(255) UNIQUE NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO security_questions (question) VALUES
-('What was the name of your first pet?'),
-('What is your mother''s maiden name?'),
-('What city were you born in?'),
-('What was the name of your first school?'),
-('What is your favorite book?'),
-('What is your favorite movie?'),
-('What was your first job?'),
-('What is your favorite color?'),
-('What city did you grow up in?'),
-('What is your favorite sport?');
-
-
--- USER SECURITY ANSWERS
-CREATE TABLE user_security_answers (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+-- PASSWORD RESET TOKENS
+CREATE TABLE password_reset_tokens (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
-    question_id INT NOT NULL,
-    answer_hash VARCHAR(255) NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    requested_ip VARCHAR(45) DEFAULT NULL,
+    user_agent VARCHAR(1000) DEFAULT NULL,
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (question_id) REFERENCES security_questions(id) ON DELETE CASCADE,
-    UNIQUE(user_id, question_id)
+    UNIQUE KEY uniq_password_reset_token_hash (token_hash),
+    INDEX idx_password_reset_user_active (user_id, used_at, expires_at),
+    INDEX idx_password_reset_expiry (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

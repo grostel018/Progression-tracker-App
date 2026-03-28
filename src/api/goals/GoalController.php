@@ -3,6 +3,7 @@
 namespace src\api\goals;
 
 use src\api\logs\ActivityLogRepository;
+use src\api\dreams\DreamRepository;
 use src\lib\Auth;
 use src\lib\Database;
 
@@ -14,12 +15,14 @@ class GoalController
 {
     private Auth $auth;
     private GoalRepository $repository;
+    private DreamRepository $dreamRepository;
     private ActivityLogRepository $activityLogRepository;
 
     public function __construct()
     {
         $this->auth = new Auth(Database::getConnection(), config('app'));
         $this->repository = new GoalRepository();
+        $this->dreamRepository = new DreamRepository();
         $this->activityLogRepository = new ActivityLogRepository();
     }
 
@@ -55,6 +58,10 @@ class GoalController
             }
         }
 
+        if (!$this->dreamRepository->isOwnedByUser((int) $data['dream_id'], (int) $this->auth->id())) {
+            return ['success' => false, 'message' => 'Invalid dream selection'];
+        }
+
         $data['user_id'] = $this->auth->id();
 
         try {
@@ -87,6 +94,10 @@ class GoalController
 
         if (!$goal) {
             return ['success' => false, 'message' => 'Goal not found'];
+        }
+
+        if (isset($data['dream_id']) && !$this->dreamRepository->isOwnedByUser((int) $data['dream_id'], (int) $this->auth->id())) {
+            return ['success' => false, 'message' => 'Invalid dream selection'];
         }
 
         if ($this->repository->update($id, $this->auth->id(), $data)) {

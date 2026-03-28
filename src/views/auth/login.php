@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="<?= safe_output(asset_url('assets/css/style.css')) ?>">
     <script defer src="<?= safe_output(asset_url('assets/js/auth.js')) ?>"></script>
 </head>
-<body data-page="login">
+<body data-page="login" data-csrf-token="<?= safe_output(csrf_token_value()) ?>">
     <a class="skip-link" href="#auth-main">Skip to sign in form</a>
     <div class="container auth-shell">
         <section class="auth-intro" aria-label="Progression Tracker overview">
@@ -68,6 +68,7 @@
             </header>
             <main class="auth-section" id="auth-main" tabindex="-1">
                 <form action="api/auth/login.php" method="POST" id="loginForm" novalidate>
+                    <?= csrf_token_input() ?>
                     <div class="inputs">
                         <label for="email">E-mail</label>
                         <input type="email" id="email" name="email" placeholder="example@mail.com" autocomplete="email" inputmode="email" maxlength="254" aria-describedby="email-feedback" required>

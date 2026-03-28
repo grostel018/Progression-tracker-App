@@ -207,6 +207,7 @@ class Auth
 
         if (\wants_json()) {
             \json_response(['error' => 'Unauthorized'], 401);
+            exit;
         }
 
         \redirect('login.php');
@@ -218,90 +219,5 @@ class Auth
         $hash = password_hash($password, PASSWORD_ARGON2ID);
         $stmt = $this->db->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
         $stmt->execute([$hash, $userId]);
-    }
-
-    // ============== SECURITY QUESTION METHODS ==============
-
-    /**
-     * Get all available security questions
-     */
-    public function getSecurityQuestions(): array
-    {
-        $stmt = $this->db->query('SELECT id, question FROM security_questions ORDER BY question');
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * Get security questions for a user
-     */
-    public function getUserSecurityQuestions(int $userId): array
-    {
-        $stmt = $this->db->prepare("
-            SELECT sq.id, sq.question, usa.answer_hash
-            FROM security_questions sq
-            JOIN user_security_answers usa ON sq.id = usa.question_id
-            WHERE usa.user_id = ?
-        ");
-        $stmt->execute([$userId]);
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * Get a single security question answer hash
-     */
-    public function getSecurityAnswerHash(int $userId, int $questionId): ?string
-    {
-        $stmt = $this->db->prepare(
-            'SELECT answer_hash FROM user_security_answers WHERE user_id = ? AND question_id = ?'
-        );
-        $stmt->execute([$userId, $questionId]);
-        $result = $stmt->fetch();
-        return $result['answer_hash'] ?? null;
-    }
-
-    /**
-     * Set security questions for a user
-     */
-    public function setSecurityQuestions(int $userId, array $questions): bool
-    {
-        // questions = [question_id => answer]
-        foreach ($questions as $questionId => $answer) {
-            $hash = password_hash($answer, PASSWORD_ARGON2ID);
-            $stmt = $this->db->prepare(
-                'INSERT INTO user_security_answers (user_id, question_id, answer_hash) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE answer_hash = VALUES(answer_hash)'
-            );
-            $stmt->execute([$userId, (int)$questionId, $hash]);
-        }
-        return true;
-    }
-
-    /**
-     * Verify security question answer
-     */
-    public function verifySecurityAnswer(int $userId, int $questionId, string $answer): bool
-    {
-        $stmt = $this->db->prepare(
-            'SELECT answer_hash FROM user_security_answers WHERE user_id = ? AND question_id = ?'
-        );
-        $stmt->execute([$userId, $questionId]);
-        $result = $stmt->fetch();
-
-        if (!$result) {
-            return false;
-        }
-
-        return password_verify($answer, $result['answer_hash']);
-    }
-
-    /**
-     * Check if user has security questions set up
-     */
-    public function hasSecurityQuestions(int $userId): bool
-    {
-        $stmt = $this->db->prepare(
-            'SELECT COUNT(*) FROM user_security_answers WHERE user_id = ?'
-        );
-        $stmt->execute([$userId]);
-        return (int) $stmt->fetchColumn() >= 2;
     }
 }

@@ -78,6 +78,17 @@ body[data-page="logs"] {
     display: none;
 }
 
+.logout-form {
+    margin: 0;
+}
+
+.logout-form button {
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+}
+
 .mobile-logout-link:hover {
     border-color: rgba(255, 125, 144, 0.4);
     color: #fff0f3;

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="<?= safe_output(asset_url('assets/css/style.css')) ?>">
     <script defer src="<?= safe_output(asset_url('assets/js/auth.js')) ?>"></script>
 </head>
-<body data-page="forgot">
+<body data-page="forgot" data-csrf-token="<?= safe_output(csrf_token_value()) ?>">
     <a class="skip-link" href="#auth-main">Skip to recovery form</a>
     <div class="container auth-shell">
         <section class="auth-intro" aria-label="Progression Tracker recovery">
@@ -31,90 +31,46 @@
                     </li>
                     <li>
                         <span class="auth-console-index">02</span>
-                        <span class="auth-console-text">verify recovery answers</span>
-                        <span class="auth-console-state">pending</span>
-                    </li>
-                    <li>
-                        <span class="auth-console-index">03</span>
-                        <span class="auth-console-text">set new password</span>
-                        <span class="auth-console-state">prepared</span>
+                        <span class="auth-console-text">receive one-time reset link</span>
+                        <span class="auth-console-state">armed</span>
                     </li>
                 </ul>
             </div>
             <div class="auth-status-grid" aria-hidden="true">
                 <div class="auth-status-item">
                     <span class="auth-status-label">Recovery</span>
-                    <strong>Three-Step Reset</strong>
+                    <strong>One-Time Link</strong>
                 </div>
                 <div class="auth-status-item">
                     <span class="auth-status-label">Route</span>
-                    <strong>Email + Answers</strong>
+                    <strong>Email Token</strong>
                 </div>
                 <div class="auth-status-item">
                     <span class="auth-status-label">Access</span>
-                    <strong>New Password</strong>
+                    <strong>Reset Page</strong>
                 </div>
             </div>
         </section>
         <section class="auth-panel">
             <header class="auth-panel-header">
                 <p class="auth-panel-label">Recovery Console</p>
-                <p class="auth-panel-copy">Start with the account email, verify the saved recovery answers, then create a new password.</p>
+                <p class="auth-panel-copy">Enter your account email and a one-time password reset link will be issued if the address is registered.</p>
             </header>
             <main class="auth-section" id="auth-main" tabindex="-1">
                 <form action="api/auth/forgot.php" method="POST" id="forgotForm" novalidate>
-                    <ol class="recovery-steps" id="recoverySteps" aria-label="Password recovery steps">
-                        <li class="recovery-step is-active" data-stage="email">
-                            <span class="recovery-step-index">01</span>
-                            <div class="recovery-step-copy">
-                                <strong>Account</strong>
-                                <span>Enter the email tied to the account.</span>
-                            </div>
-                        </li>
-                        <li class="recovery-step" data-stage="questions">
-                            <span class="recovery-step-index">02</span>
-                            <div class="recovery-step-copy">
-                                <strong>Verification</strong>
-                                <span>Answer the recovery questions exactly as saved.</span>
-                            </div>
-                        </li>
-                        <li class="recovery-step" data-stage="reset">
-                            <span class="recovery-step-index">03</span>
-                            <div class="recovery-step-copy">
-                                <strong>Password</strong>
-                                <span>Choose and confirm a new password.</span>
-                            </div>
-                        </li>
-                    </ol>
+                    <?= csrf_token_input() ?>
                     <p class="forgot-description" id="forgotDescription">
-                        Enter the account email to begin recovery.
+                        Enter the account email to request a secure reset link.
                     </p>
                     <div class="inputs">
                         <label for="email">E-mail</label>
                         <input type="email" id="email" name="email" placeholder="example@mail.com" autocomplete="email" inputmode="email" maxlength="254" aria-describedby="email-feedback" required>
                         <p class="input-feedback" id="email-feedback" data-feedback-for="email" aria-live="polite"></p>
                     </div>
-                    <section class="forgot-step forgot-step-hidden" id="securityChallengeStep" aria-live="polite" hidden>
-                        <p class="security-note">Answer both questions exactly as you set them during registration.</p>
-                        <div id="securityChallengeFields"></div>
-                    </section>
-                    <section class="forgot-step forgot-step-hidden" id="resetPasswordStep" aria-live="polite" hidden>
-                        <div class="inputs">
-                            <label for="reset_password">New Password</label>
-                            <input type="password" id="reset_password" name="reset_password" minlength="6" maxlength="72" autocomplete="new-password" aria-describedby="reset_password-feedback" disabled>
-                            <p class="input-feedback" id="reset_password-feedback" aria-live="polite"></p>
-                        </div>
-                        <div class="inputs">
-                            <label for="reset_password_confirm">Repeat New Password</label>
-                            <input type="password" id="reset_password_confirm" name="reset_password_confirm" minlength="6" maxlength="72" autocomplete="new-password" aria-describedby="reset_password_confirm-feedback" disabled>
-                            <p class="input-feedback" id="reset_password_confirm-feedback" aria-live="polite"></p>
-                        </div>
-                    </section>
                     <div id="error" aria-live="polite"><?= isset($error) ? safe_output($error) : '' ?></div>
                     <div id="success" aria-live="polite"></div>
                     <div class="auth-actions">
-                        <button type="button" class="btn-action btn-secondary step-back-btn" id="forgotBackButton" hidden>&gt; Change Email</button>
-                        <button type="submit" class="btn-primary" id="forgotSubmitButton">&gt; Continue</button>
+                        <button type="submit" class="btn-primary" id="forgotSubmitButton">&gt; Send Reset Link</button>
                     </div>
                     <p class="register-text">
                         <a href="login.php">Back to login</a>

@@ -15,7 +15,7 @@ This project is built as a **server-rendered PHP application with JavaScript enh
   - Register
   - Login
   - Logout
-  - Forgot password flow
+  - Password reset via one-time token link
 - Dashboard for viewing progress
 - Goal management
 - Dream management
@@ -48,6 +48,7 @@ Progression Tracker App/
 │   ├── login.php
 │   ├── register.php
 │   ├── forgot.php
+│   ├── reset-password.php
 │   ├── dashboard.php
 │   ├── dreams.php
 │   ├── goals.php
@@ -59,7 +60,8 @@ Progression Tracker App/
 │       ├── auth/
 │       │   ├── login.php
 │       │   ├── register.php
-│       │   └── forgot.php
+│       │   ├── forgot.php
+│       │   └── reset-password.php
 │       ├── goals.php
 │       ├── dreams.php
 │       ├── categories.php
@@ -72,8 +74,12 @@ Progression Tracker App/
 │   ├── api/
 │   │   ├── auth/
 │   │   │   ├── AuthInputValidator.php
+│   │   │   ├── ForgotPasswordHandler.php
 │   │   │   ├── LoginHandler.php
+│   │   │   ├── PasswordResetMailer.php
+│   │   │   ├── PasswordResetTokenRepository.php
 │   │   │   ├── RegisterHandler.php
+│   │   │   ├── ResetPasswordHandler.php
 │   │   │   └── SessionManager.php
 │   │   │
 │   │   ├── goals/
@@ -92,13 +98,15 @@ Progression Tracker App/
 │   ├── lib/
 │   │   ├── helpers.php
 │   │   ├── Database.php
-│   │   └── Auth.php
+│   │   ├── Auth.php
+│   │   └── RateLimiter.php
 │   │
 │   ├── views/
 │   │   ├── auth/
 │   │   │   ├── login.php
 │   │   │   ├── register.php
-│   │   │   └── forgot.php
+│   │   │   ├── forgot.php
+│   │   │   └── reset-password.php
 │   │   │
 │   │   ├── dashboard/
 │   │   │   ├── index.php
@@ -124,8 +132,8 @@ Progression Tracker App/
 │   ├── app.php
 │   └── database.php
 │
-├── DB/                          # SQL schema
-├── var/                         # Runtime/session storage
+├── DB/                          # SQL schema + migrations
+├── var/                         # Runtime/session, rate-limit, and mail-log storage
 ├── legacy/                      # Archived old code
 └── public/assets/               # Served copies of CSS/JS
 ````
@@ -223,6 +231,9 @@ Important shared files include:
 * `Auth.php`
   Handles login, logout, session checks, current user lookup, and `requireAuth()`.
 
+* `RateLimiter.php`
+  Provides lightweight file-backed throttling for login and password reset endpoints.
+
 ---
 
 ### 6. `src/assets/` and `public/assets/`
@@ -281,14 +292,20 @@ Relevant files:
 * `public/login.php`
 * `public/register.php`
 * `public/forgot.php`
+* `public/reset-password.php`
 * `public/logout.php`
 * `public/api/auth/login.php`
 * `public/api/auth/register.php`
 * `public/api/auth/forgot.php`
+* `public/api/auth/reset-password.php`
 * `src/lib/Auth.php`
 * `src/api/auth/AuthInputValidator.php`
+* `src/api/auth/ForgotPasswordHandler.php`
 * `src/api/auth/LoginHandler.php`
+* `src/api/auth/PasswordResetMailer.php`
+* `src/api/auth/PasswordResetTokenRepository.php`
 * `src/api/auth/RegisterHandler.php`
+* `src/api/auth/ResetPasswordHandler.php`
 * `src/api/auth/SessionManager.php`
 * `src/assets/js/auth.js`
 
@@ -303,6 +320,18 @@ Relevant files:
 7. `Auth.php` verifies credentials and starts the session
 8. A JSON response is returned
 9. The frontend handles success or error feedback
+
+---
+
+### Password reset flow
+
+1. User opens `public/forgot.php`
+2. The forgot-password form posts to `public/api/auth/forgot.php`
+3. `ForgotPasswordHandler.php` issues a one-time reset token if the account exists
+4. `PasswordResetMailer.php` delivers the reset link by mail or local log transport
+5. User opens `public/reset-password.php?token=...`
+6. The reset form posts to `public/api/auth/reset-password.php`
+7. `ResetPasswordHandler.php` validates the token, rotates the password, and invalidates the token
 
 ---
 
@@ -398,6 +427,12 @@ public/
 
 This is important because `public/` is the web root.
 
+For the local XAMPP setup in this workspace, `http://localhost/` is configured to point at:
+
+```text
+Progression tracker app/public
+```
+
 ### 5. Make sure runtime/session storage is writable
 
 The app uses:
@@ -407,6 +442,14 @@ var/
 ```
 
 for runtime/session-related storage, so ensure PHP can write there if required.
+
+In development, password reset links are written to:
+
+```text
+var/logs/password-reset.log
+```
+
+when `MAIL_TRANSPORT=log`.
 
 ### 6. Sync frontend assets if needed
 

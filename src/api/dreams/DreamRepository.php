@@ -30,6 +30,7 @@ class DreamRepository
                         FROM history_entries he
                         WHERE he.entity_type = \'dream\'
                           AND he.entity_id = d.id
+                          AND he.user_id = d.user_id
                     ) as log_count
                   FROM dreams d
                   WHERE d.user_id = ?';
@@ -64,12 +65,20 @@ class DreamRepository
                         FROM history_entries he
                         WHERE he.entity_type = \'dream\'
                           AND he.entity_id = d.id
+                          AND he.user_id = d.user_id
                     ) as log_count
              FROM dreams d
              WHERE d.id = ? AND d.user_id = ?'
         );
         $stmt->execute([$id, $userId]);
         return $stmt->fetch();
+    }
+
+    public function isOwnedByUser(int $id, int $userId): bool
+    {
+        $stmt = $this->db->prepare('SELECT 1 FROM dreams WHERE id = ? AND user_id = ? LIMIT 1');
+        $stmt->execute([$id, $userId]);
+        return (bool) $stmt->fetchColumn();
     }
 
     /**

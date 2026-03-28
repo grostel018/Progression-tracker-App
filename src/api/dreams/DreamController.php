@@ -3,6 +3,7 @@
 namespace src\api\dreams;
 
 use src\api\logs\ActivityLogRepository;
+use src\api\categories\CategoryRepository;
 use src\lib\Auth;
 use src\lib\Database;
 
@@ -14,12 +15,14 @@ class DreamController
 {
     private Auth $auth;
     private DreamRepository $repository;
+    private CategoryRepository $categoryRepository;
     private ActivityLogRepository $activityLogRepository;
 
     public function __construct()
     {
         $this->auth = new Auth(Database::getConnection(), config('app'));
         $this->repository = new DreamRepository();
+        $this->categoryRepository = new CategoryRepository();
         $this->activityLogRepository = new ActivityLogRepository();
     }
 
@@ -55,6 +58,10 @@ class DreamController
             }
         }
 
+        if (!$this->categoryRepository->isOwnedByUser((int) $data['category_id'], (int) $this->auth->id())) {
+            return ['success' => false, 'message' => 'Invalid category selection'];
+        }
+
         $data['user_id'] = $this->auth->id();
 
         try {
@@ -86,6 +93,10 @@ class DreamController
 
         if (!$dream) {
             return ['success' => false, 'message' => 'Dream not found'];
+        }
+
+        if (isset($data['category_id']) && !$this->categoryRepository->isOwnedByUser((int) $data['category_id'], (int) $this->auth->id())) {
+            return ['success' => false, 'message' => 'Invalid category selection'];
         }
 
         if ($this->repository->update($id, $this->auth->id(), $data)) {

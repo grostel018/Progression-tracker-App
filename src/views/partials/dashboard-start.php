@@ -19,7 +19,7 @@
         <script defer src="<?= safe_output(asset_url('assets/js/' . $script)) ?>"></script>
     <?php endforeach; ?>
 </head>
-<body data-page="<?= safe_output($pageId) ?>" data-app-timezone="<?= safe_output((string) config('app.timezone', 'UTC')) ?>">
+<body data-page="<?= safe_output($pageId) ?>" data-app-timezone="<?= safe_output((string) config('app.timezone', 'UTC')) ?>" data-csrf-token="<?= safe_output(csrf_token_value()) ?>">
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="dashboard-container">
         <aside class="sidebar" aria-label="Workspace">
@@ -28,7 +28,10 @@
                     <span class="brand-mark">Progression Tracker</span>
                     <span class="username">Welcome, <?= safe_output($user['username']) ?></span>
                     <span class="user-presence">tracking node active</span>
-                    <a href="logout.php" class="mobile-logout-link">Exit Node</a>
+                    <form action="logout.php" method="POST" class="logout-form">
+                        <?= csrf_token_input() ?>
+                        <button type="submit" class="mobile-logout-link">Exit Node</button>
+                    </form>
                 </div>
                 <ul class="nav-list">
                     <li><a href="dashboard.php" class="nav-link<?= $activePage === 'dashboard' ? ' active' : '' ?>"<?= $activePage === 'dashboard' ? ' aria-current="page"' : '' ?>>Dashboard</a></li>
@@ -38,7 +41,10 @@
                     <li><a href="logs.php" class="nav-link<?= $activePage === 'logs' ? ' active' : '' ?>"<?= $activePage === 'logs' ? ' aria-current="page"' : '' ?>>Weekly Review</a></li>
                 </ul>
                 <div class="nav-bottom">
-                    <a href="logout.php" class="nav-link logout">Exit Node</a>
+                    <form action="logout.php" method="POST" class="logout-form">
+                        <?= csrf_token_input() ?>
+                        <button type="submit" class="nav-link logout">Exit Node</button>
+                    </form>
                 </div>
             </nav>
         </aside>

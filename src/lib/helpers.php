@@ -335,12 +335,28 @@ if (!function_exists('request_method')) {
     }
 }
 
+if (!function_exists('is_state_changing_request')) {
+    /**
+     * Determine whether the current request mutates server state.
+     */
+    function is_state_changing_request(): bool
+    {
+        return in_array(request_method(), ['POST', 'PUT', 'PATCH', 'DELETE'], true);
+    }
+}
+
 if (!function_exists('request_input')) {
     /**
      * Parse JSON or form input into an array.
      */
     function request_input(): array
     {
+        static $cachedInput = null;
+
+        if (is_array($cachedInput)) {
+            return $cachedInput;
+        }
+
         $raw = file_get_contents('php://input');
         $method = request_method();
 
@@ -348,16 +364,29 @@ if (!function_exists('request_input')) {
             $decoded = json_decode($raw, true);
 
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
+                $cachedInput = $decoded;
+                return $cachedInput;
             }
 
             if (in_array($method, ['PUT', 'PATCH', 'DELETE'], true)) {
                 parse_str($raw, $parsed);
-                return is_array($parsed) ? $parsed : [];
+                $cachedInput = is_array($parsed) ? $parsed : [];
+                return $cachedInput;
             }
         }
 
-        return is_array($_POST) ? $_POST : [];
+        $cachedInput = is_array($_POST) ? $_POST : [];
+        return $cachedInput;
+    }
+}
+
+if (!function_exists('request_ip')) {
+    /**
+     * Read the client IP from the direct connection.
+     */
+    function request_ip(): string
+    {
+        return trim((string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown')) ?: 'unknown';
     }
 }
 
@@ -385,6 +414,91 @@ if (!function_exists('json_response')) {
     }
 }
 
+if (!function_exists('csrf_token_value')) {
+    /**
+     * Get or create the per-session CSRF token.
+     */
+    function csrf_token_value(): string
+    {
+        start_app_session();
+
+        if (empty($_SESSION['_csrf_token']) || !is_string($_SESSION['_csrf_token'])) {
+            $_SESSION['_csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        return $_SESSION['_csrf_token'];
+    }
+}
+
+if (!function_exists('csrf_token_input')) {
+    /**
+     * Render a hidden CSRF input.
+     */
+    function csrf_token_input(): string
+    {
+        return '<input type="hidden" name="_csrf" value="' . safe_output(csrf_token_value()) . '">';
+    }
+}
+
+if (!function_exists('request_csrf_token')) {
+    /**
+     * Read the CSRF token from the header or parsed request body.
+     */
+    function request_csrf_token(): string
+    {
+        $headerToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+        if (is_string($headerToken) && trim($headerToken) !== '') {
+            return trim($headerToken);
+        }
+
+        $input = request_input();
+        $bodyToken = $input['_csrf'] ?? '';
+        return is_string($bodyToken) ? trim($bodyToken) : '';
+    }
+}
+
+if (!function_exists('is_valid_csrf_token')) {
+    /**
+     * Validate a supplied CSRF token against the session token.
+     */
+    function is_valid_csrf_token(?string $token): bool
+    {
+        if (!is_string($token) || $token === '') {
+            return false;
+        }
+
+        return hash_equals(csrf_token_value(), $token);
+    }
+}
+
+if (!function_exists('require_csrf_token')) {
+    /**
+     * Reject state-changing requests without a valid CSRF token.
+     */
+    function require_csrf_token(): void
+    {
+        if (!is_state_changing_request()) {
+            return;
+        }
+
+        if (is_valid_csrf_token(request_csrf_token())) {
+            return;
+        }
+
+        if (wants_json()) {
+            json_response([
+                'success' => false,
+                'message' => 'Security token mismatch. Refresh the page and try again.',
+            ], 419);
+            exit;
+        }
+
+        http_response_code(419);
+        echo 'Security token mismatch. Refresh the page and try again.';
+        exit;
+    }
+}
+
 if (!function_exists('boot_api')) {
     /**
      * Prepare database and session state for API endpoints.
@@ -393,6 +507,7 @@ if (!function_exists('boot_api')) {
     {
         boot_database();
         start_app_session();
+        require_csrf_token();
     }
 }
 

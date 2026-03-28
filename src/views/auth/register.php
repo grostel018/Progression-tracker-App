@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="<?= safe_output(asset_url('assets/css/style.css')) ?>">
     <script defer src="<?= safe_output(asset_url('assets/js/auth.js')) ?>"></script>
 </head>
-<body data-page="register">
+<body data-page="register" data-csrf-token="<?= safe_output(csrf_token_value()) ?>">
     <a class="skip-link" href="#auth-main">Skip to registration form</a>
     <div class="container auth-shell">
         <section class="auth-intro" aria-label="Progression Tracker overview">
@@ -68,6 +68,7 @@
             </header>
             <main class="auth-section" id="auth-main" tabindex="-1">
                 <form action="api/auth/register.php" method="POST" id="registerForm" novalidate>
+                    <?= csrf_token_input() ?>
                     <div class="inputs">
                         <label for="email">E-mail</label>
                         <input type="email" id="email" name="email" placeholder="example@mail.com" autocomplete="email" inputmode="email" maxlength="254" aria-describedby="email-feedback" required>
@@ -80,34 +81,14 @@
                     </div>
                     <div class="inputs">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" minlength="6" maxlength="72" autocomplete="new-password" aria-describedby="password-feedback" required>
+                        <input type="password" id="password" name="password" minlength="10" maxlength="72" autocomplete="new-password" aria-describedby="password-feedback" required>
                         <p class="input-feedback" id="password-feedback" data-feedback-for="password" aria-live="polite"></p>
                     </div>
                     <div class="inputs">
                         <label for="password2">Repeat Password</label>
-                        <input type="password" id="password2" name="password2" minlength="6" maxlength="72" autocomplete="new-password" aria-describedby="password2-feedback" required>
+                        <input type="password" id="password2" name="password2" minlength="10" maxlength="72" autocomplete="new-password" aria-describedby="password2-feedback" required>
                         <p class="input-feedback" id="password2-feedback" data-feedback-for="password2" aria-live="polite"></p>
                     </div>
-                    <section class="security-questions" aria-label="Security questions for password recovery">
-                        <h3>Security Questions (Optional)</h3>
-                        <p class="security-note">Set up 2 security questions to recover your password without email verification.</p>
-                        <div class="security-question-group">
-                            <label for="security_question_1">Question 1</label>
-                            <select id="security_question_1" name="security_questions[]" aria-describedby="security_question_1-feedback">
-                                <option value="">-- Select a question --</option>
-                            </select>
-                            <input type="text" id="security_answer_1" name="security_answers[]" placeholder="Your answer" maxlength="255" autocomplete="off">
-                            <p class="input-feedback" id="security_question_1-feedback" aria-live="polite"></p>
-                        </div>
-                        <div class="security-question-group">
-                            <label for="security_question_2">Question 2</label>
-                            <select id="security_question_2" name="security_questions[]" aria-describedby="security_question_2-feedback">
-                                <option value="">-- Select a question --</option>
-                            </select>
-                            <input type="text" id="security_answer_2" name="security_answers[]" placeholder="Your answer" maxlength="255" autocomplete="off">
-                            <p class="input-feedback" id="security_question_2-feedback" aria-live="polite"></p>
-                        </div>
-                    </section>
                     <div id="error" aria-live="polite"><?= isset($error) ? safe_output($error) : '' ?></div>
                     <button type="submit" class="btn-primary">&gt; Register</button>
                     <p class="register-text">

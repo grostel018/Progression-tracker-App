@@ -7,4 +7,7 @@ require_once __DIR__ . '/../../../src/bootstrap.php';
 use src\api\auth\ForgotPasswordHandler;
 
 boot_api();
-json_response((new ForgotPasswordHandler())->handle(request_input()));
+$result = (new ForgotPasswordHandler())->handle(request_input());
+$status = (int) ($result['status'] ?? 200);
+unset($result['status']);
+json_response($result, $status);

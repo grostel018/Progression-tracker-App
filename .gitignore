@@ -1,0 +1,6 @@
+**/DB/backups/
+**/var/logs/
+**/var/rate-limits/
+**/var/mail/
+**/var/sessions/
+*.log

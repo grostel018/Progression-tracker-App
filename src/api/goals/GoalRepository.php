@@ -32,25 +32,29 @@ class GoalRepository
                         FROM history_entries he
                         WHERE he.entity_type = \'goal\'
                           AND he.entity_id = g.id
+                          AND he.user_id = g.user_id
                     ) as log_count,
                     (
                         SELECT COUNT(*)
                         FROM goal_tasks gt
                         WHERE gt.goal_id = g.id
+                          AND gt.user_id = g.user_id
                     ) as task_count,
                     (
                         SELECT COUNT(*)
                         FROM goal_tasks gt_completed
                         WHERE gt_completed.goal_id = g.id
                           AND gt_completed.is_completed = 1
+                          AND gt_completed.user_id = g.user_id
                     ) as completed_task_count,
                     (
                         SELECT COUNT(*)
                         FROM goal_habits gh
                         WHERE gh.goal_id = g.id
+                          AND gh.user_id = g.user_id
                     ) as habit_count
                   FROM goals g
-                  JOIN dreams d ON g.dream_id = d.id
+                  JOIN dreams d ON g.dream_id = d.id AND d.user_id = g.user_id
                   WHERE g.user_id = ?';
 
         $params = [$userId];
@@ -86,9 +90,10 @@ class GoalRepository
                         FROM history_entries he
                         WHERE he.entity_type = \'goal\'
                           AND he.entity_id = g.id
+                          AND he.user_id = g.user_id
                     ) as log_count
              FROM goals g
-             JOIN dreams d ON g.dream_id = d.id
+             JOIN dreams d ON g.dream_id = d.id AND d.user_id = g.user_id
              WHERE g.id = ? AND g.user_id = ?'
         );
         $stmt->execute([$id, $userId]);

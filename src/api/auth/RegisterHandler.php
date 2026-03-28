@@ -29,8 +29,6 @@ class RegisterHandler
         $username = trim($input['username'] ?? '');
         $email = trim($input['email'] ?? '');
         $password = $input['password'] ?? '';
-        $passwordConfirm = $input['password2'] ?? '';
-        $securityQuestions = $input['security_questions'] ?? '';
 
         $validation = $this->validator->validateRegister($input);
         if ($validation !== []) {
@@ -41,14 +39,6 @@ class RegisterHandler
 
         if ($result === true) {
             $userId = $this->findUserIdByEmail($email);
-
-            // Handle optional security questions
-            if ($userId !== null && !empty($securityQuestions)) {
-                $questionsData = json_decode($securityQuestions, true);
-                if (is_array($questionsData) && count($questionsData) >= 1) {
-                    $this->auth->setSecurityQuestions($userId, $questionsData);
-                }
-            }
 
             if ($userId !== null) {
                 (new ActivityLogRepository())->create([

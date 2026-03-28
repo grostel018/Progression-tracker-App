@@ -7,4 +7,7 @@ require_once __DIR__ . '/../../../src/bootstrap.php';
 use src\api\auth\RegisterHandler;
 
 boot_api();
-json_response((new RegisterHandler())->handle(request_input()));
+$result = (new RegisterHandler())->handle(request_input());
+$status = (int) ($result['status'] ?? 200);
+unset($result['status']);
+json_response($result, $status);

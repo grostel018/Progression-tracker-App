@@ -9,14 +9,18 @@ const pages = {
     },
     forgot: {
         title: 'Progression Tracker',
-        subtitle: 'Recover access in three steps: account email, recovery answers, then a new password.',
+        subtitle: 'Request a one-time reset link to rotate your password securely.',
+    },
+    reset: {
+        title: 'Progression Tracker',
+        subtitle: 'Validate the reset link and commit a strong new password.',
     },
 };
 
 const EMAIL_MAX_LENGTH = 254;
 const USERNAME_MIN_LENGTH = 3;
 const USERNAME_MAX_LENGTH = 32;
-const PASSWORD_MIN_LENGTH = 6;
+const PASSWORD_MIN_LENGTH = 10;
 
 const formRules = {
     loginForm: {
@@ -28,15 +32,19 @@ const formRules = {
         username: (value) => validateUsername(value),
         password: (value) => validatePassword(value),
         password2: (value, form) => validatePasswordConfirmation(value, form.elements.password?.value ?? ''),
-        security_question_1: (value, form) => validateSecurityQuestionPair(form),
-        security_question_2: (value, form) => validateSecurityQuestionPair(form),
-        security_answer_1: (value, form) => validateSecurityQuestionPair(form),
-        security_answer_2: (value, form) => validateSecurityQuestionPair(form),
     },
     forgotForm: {
         email: (value) => validateEmail(value),
     },
+    resetPasswordForm: {
+        password: (value) => validatePassword(value),
+        password_confirm: (value, form) => validatePasswordConfirmation(value, form.elements.password?.value ?? ''),
+    },
 };
+
+function getCsrfToken() {
+    return document.body?.dataset.csrfToken || '';
+}
 
 function typeText(element, text, speed, callback) {
     element.textContent = '';
@@ -99,9 +107,15 @@ function validatePassword(value) {
         return 'Password is required';
     }
 
-    return value.length < PASSWORD_MIN_LENGTH
-        ? `Password must be at least ${PASSWORD_MIN_LENGTH} characters`
-        : '';
+    if (value.length < PASSWORD_MIN_LENGTH) {
+        return `Password must be at least ${PASSWORD_MIN_LENGTH} characters`;
+    }
+
+    if (!/[A-Za-z]/.test(value) || !/\d/.test(value)) {
+        return 'Password must include at least one letter and one number';
+    }
+
+    return '';
 }
 
 function validatePasswordConfirmation(value, passwordValue) {
@@ -118,31 +132,6 @@ function setMessage(element, message) {
     }
 }
 
-function validateSecurityQuestionPair(form) {
-    const q1 = form.elements.security_question_1?.value ?? '';
-    const q2 = form.elements.security_question_2?.value ?? '';
-    const a1 = form.elements.security_answer_1?.value.trim() ?? '';
-    const a2 = form.elements.security_answer_2?.value.trim() ?? '';
-
-    if (q1 === '' && q2 === '' && a1 === '' && a2 === '') {
-        return '';
-    }
-
-    if ((q1 !== '' && a1 === '') || (q2 !== '' && a2 === '')) {
-        return 'Answer every selected security question';
-    }
-
-    if ((a1 !== '' && q1 === '') || (a2 !== '' && q2 === '')) {
-        return 'Select a question for each provided answer';
-    }
-
-    if (q1 !== '' && q1 === q2) {
-        return 'Please choose two different security questions';
-    }
-
-    return '';
-}
-
 function normalizeFormValues(form) {
     for (const fieldName of ['email', 'username']) {
         const field = form.elements[fieldName];
@@ -153,7 +142,7 @@ function normalizeFormValues(form) {
 }
 
 function getFieldWrapper(field) {
-    return field.closest('.inputs, .security-question-group');
+    return field.closest('.inputs');
 }
 
 function getFieldFeedback(field) {
@@ -177,7 +166,7 @@ function setFieldError(field, message) {
 }
 
 function clearFormFieldErrors(form) {
-    form.querySelectorAll('.inputs input, .inputs select, .security-question-group input, .security-question-group select')
+    form.querySelectorAll('.inputs input, .inputs select, .inputs textarea')
         .forEach((field) => setFieldError(field, ''));
 }
 
@@ -232,13 +221,16 @@ function applyServerErrors(form, errors = {}) {
 }
 
 function setupRealtimeValidation(form) {
-    form.querySelectorAll('.inputs input, .inputs select, .security-question-group input, .security-question-group select').forEach((field) => {
+    form.querySelectorAll('.inputs input, .inputs select, .inputs textarea').forEach((field) => {
         field.addEventListener('blur', () => {
             field.dataset.touched = 'true';
             validateField(field);
 
-            if (field.name === 'password' && form.elements.password2?.dataset.touched === 'true') {
-                validateField(form.elements.password2);
+            if (field.name === 'password') {
+                const confirmField = form.elements.password2 || form.elements.password_confirm;
+                if (confirmField?.dataset.touched === 'true') {
+                    validateField(confirmField);
+                }
             }
         });
 
@@ -253,8 +245,11 @@ function setupRealtimeValidation(form) {
                 validateField(field);
             }
 
-            if (field.name === 'password' && form.elements.password2?.dataset.touched === 'true') {
-                validateField(form.elements.password2);
+            if (field.name === 'password') {
+                const confirmField = form.elements.password2 || form.elements.password_confirm;
+                if (confirmField?.dataset.touched === 'true') {
+                    validateField(confirmField);
+                }
             }
         });
     });
@@ -262,36 +257,24 @@ function setupRealtimeValidation(form) {
 
 async function submitAuthForm(url, form) {
     const formData = new FormData(form);
-    const securityQuestions = form.querySelectorAll('[name="security_questions[]"]');
-    const securityAnswers = form.querySelectorAll('[name="security_answers[]"]');
+    const csrfToken = getCsrfToken();
+    const headers = {
+        Accept: 'application/json',
+    };
 
-    formData.delete('security_questions[]');
-    formData.delete('security_answers[]');
-
-    const securityQuestionMap = {};
-
-    securityQuestions.forEach((questionField, index) => {
-        const answer = securityAnswers[index]?.value.trim() ?? '';
-
-        if (questionField.value !== '' && answer !== '') {
-            securityQuestionMap[questionField.value] = answer;
-        }
-    });
-
-    if (Object.keys(securityQuestionMap).length > 0) {
-        formData.append('security_questions', JSON.stringify(securityQuestionMap));
+    if (csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken;
     }
 
     const response = await fetch(url, {
         method: 'POST',
         body: formData,
         credentials: 'include',
-        headers: {
-            Accept: 'application/json',
-        },
+        headers,
     });
 
-    return response.json();
+    const data = await response.json();
+    return { response, data };
 }
 
 function setupAsyncAuthForm(formId, options) {
@@ -308,334 +291,69 @@ function setupAsyncAuthForm(formId, options) {
         const errorBox = document.getElementById('error');
         const successBox = document.getElementById('success');
 
-        if (errorBox) {
-            errorBox.textContent = '';
-        }
-
-        if (successBox) {
-            successBox.textContent = '';
-        }
-
+        setMessage(errorBox, '');
+        setMessage(successBox, '');
         clearFormFieldErrors(form);
 
         const errors = validateForm(form);
         if (Object.keys(errors).length > 0) {
-            if (errorBox) {
-                errorBox.textContent = Object.values(errors)[0];
-            }
+            setMessage(errorBox, Object.values(errors)[0]);
             return;
         }
 
         try {
-            const data = await submitAuthForm(options.url, form);
+            const { response, data } = await submitAuthForm(options.url, form);
 
             if (data.success) {
+                if (typeof options.onSuccess === 'function') {
+                    options.onSuccess({ form, response, data, successBox, errorBox });
+                    return;
+                }
+
                 if (options.onSuccessRedirect) {
                     window.location.href = options.onSuccessRedirect;
                     return;
                 }
 
-                if (successBox) {
-                    successBox.textContent = data.message || options.successMessage || '';
-                }
+                setMessage(successBox, data.message || options.successMessage || '');
                 return;
             }
 
             applyServerErrors(form, data.errors);
-
-            if (errorBox) {
-                errorBox.textContent = data.message || options.errorMessage;
-            }
+            setMessage(errorBox, data.message || options.errorMessage);
         } catch (error) {
-            if (errorBox) {
-                errorBox.textContent = options.errorMessage;
-            }
             console.error(error);
+            setMessage(errorBox, options.errorMessage);
         }
     });
-}
-
-setupAsyncAuthForm('loginForm', {
-    url: 'api/auth/login.php',
-    onSuccessRedirect: 'dashboard.php',
-    errorMessage: 'Login failed. Try again.',
-});
-
-setupAsyncAuthForm('registerForm', {
-    url: 'api/auth/register.php',
-    onSuccessRedirect: 'login.php',
-    errorMessage: 'Registration failed. Try again.',
-});
-
-function createSecurityQuestionField(question, index) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'security-question-card';
-
-    const prompt = document.createElement('p');
-    prompt.className = 'security-question-prompt';
-    prompt.textContent = question.question;
-
-    const fieldWrapper = document.createElement('div');
-    fieldWrapper.className = 'inputs';
-
-    const label = document.createElement('label');
-    label.htmlFor = `recovery_answer_${index}`;
-    label.textContent = `Answer ${index + 1}`;
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.id = `recovery_answer_${index}`;
-    input.name = `recovery_answer_${question.id}`;
-    input.autocomplete = 'off';
-    input.maxLength = 255;
-    input.dataset.questionId = String(question.id);
-    input.setAttribute('aria-describedby', `recovery_answer_${index}_feedback`);
-
-    const feedback = document.createElement('p');
-    feedback.className = 'input-feedback';
-    feedback.id = `recovery_answer_${index}_feedback`;
-    feedback.setAttribute('aria-live', 'polite');
-
-    fieldWrapper.append(label, input, feedback);
-    wrapper.append(prompt, fieldWrapper);
-
-    return wrapper;
 }
 
 function setupForgotPasswordFlow() {
-    const form = document.getElementById('forgotForm');
-    if (!form) {
-        return;
-    }
+    setupAsyncAuthForm('forgotForm', {
+        url: 'api/auth/forgot.php',
+        successMessage: 'If the address is registered, a password reset link will be sent shortly.',
+        errorMessage: 'Password reset request failed. Try again.',
+        onSuccess: ({ form, data, successBox }) => {
+            form.reset();
+            clearFormFieldErrors(form);
+            setMessage(successBox, data.message || 'If the address is registered, a password reset link will be sent shortly.');
+        },
+    });
+}
 
-    const emailField = form.elements.email;
-    const description = document.getElementById('forgotDescription');
-    const challengeStep = document.getElementById('securityChallengeStep');
-    const challengeFields = document.getElementById('securityChallengeFields');
-    const resetStep = document.getElementById('resetPasswordStep');
-    const submitButton = document.getElementById('forgotSubmitButton');
-    const backButton = document.getElementById('forgotBackButton');
-    const stepItems = Array.from(document.querySelectorAll('#recoverySteps .recovery-step'));
-    const errorBox = document.getElementById('error');
-    const successBox = document.getElementById('success');
-    const resetPasswordField = document.getElementById('reset_password');
-    const resetPasswordConfirmField = document.getElementById('reset_password_confirm');
-
-    if (!emailField || !description || !challengeStep || !challengeFields || !resetStep || !submitButton || !backButton || !resetPasswordField || !resetPasswordConfirmField) {
-        return;
-    }
-
-    let stage = 'email';
-    let resetToken = '';
-
-    setupRealtimeValidation(form);
-
-    const setStage = (nextStage) => {
-        stage = nextStage;
-        challengeStep.classList.toggle('forgot-step-hidden', stage === 'email' || stage === 'reset');
-        resetStep.classList.toggle('forgot-step-hidden', stage !== 'reset');
-        challengeStep.hidden = stage === 'email' || stage === 'reset';
-        resetStep.hidden = stage !== 'reset';
-        backButton.hidden = stage === 'email';
-        resetPasswordField.disabled = stage !== 'reset';
-        resetPasswordConfirmField.disabled = stage !== 'reset';
-
-        stepItems.forEach((item) => {
-            const itemStage = item.dataset.stage;
-            const order = ['email', 'questions', 'reset'];
-            const currentIndex = order.indexOf(stage);
-            const itemIndex = order.indexOf(itemStage);
-
-            item.classList.toggle('is-active', itemStage === stage);
-            item.classList.toggle('is-complete', itemIndex > -1 && itemIndex < currentIndex);
-        });
-
-        if (stage === 'email') {
-            description.textContent = 'Enter the account email to begin recovery.';
-            submitButton.textContent = '> Continue';
-            emailField.readOnly = false;
-            challengeFields.innerHTML = '';
-            resetPasswordField.value = '';
-            resetPasswordConfirmField.value = '';
-            resetToken = '';
-            return;
-        }
-
-        if (stage === 'questions') {
-            description.textContent = 'Answer the saved recovery questions for this account.';
-            submitButton.textContent = '> Verify Answers';
-            emailField.readOnly = true;
-            return;
-        }
-
-        description.textContent = 'Verification passed. Set and confirm the new password.';
-        submitButton.textContent = '> Save New Password';
-        emailField.readOnly = true;
-    };
-
-    const collectRecoveryAnswers = () => {
-        const inputs = challengeFields.querySelectorAll('input[data-question-id]');
-        const answers = {};
-        let hasError = false;
-
-        inputs.forEach((input) => {
-            const value = input.value.trim();
-            const message = value === '' ? 'Answer is required' : '';
-
-            setFieldError(input, message);
-
-            if (message) {
-                hasError = true;
-                return;
-            }
-
-            answers[input.dataset.questionId] = value;
-        });
-
-        return hasError ? null : answers;
-    };
-
-    const validateResetFields = () => {
-        const passwordMessage = validatePassword(resetPasswordField.value);
-        const confirmMessage = validatePasswordConfirmation(resetPasswordConfirmField.value, resetPasswordField.value);
-
-        setFieldError(resetPasswordField, passwordMessage);
-        setFieldError(resetPasswordConfirmField, confirmMessage);
-
-        return passwordMessage === '' && confirmMessage === '';
-    };
-
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        setMessage(errorBox, '');
-        setMessage(successBox, '');
-
-        if (stage === 'email') {
-            const emailMessage = validateEmail(emailField.value);
-            setFieldError(emailField, emailMessage);
-
-            if (emailMessage !== '') {
-                setMessage(errorBox, '');
-                return;
-            }
-
-            try {
-                const data = await submitAuthForm('api/auth/forgot.php', form);
-
-                if (!data.success) {
-                    applyServerErrors(form, data.errors);
-                    const hasFieldErrors = Boolean(data.errors && Object.keys(data.errors).length > 0);
-                    setMessage(errorBox, hasFieldErrors ? '' : (data.message || 'Failed to load security questions'));
-                    return;
-                }
-
-                challengeFields.innerHTML = '';
-
-                if (!Array.isArray(data.questions) || data.questions.length < 2) {
-                    setMessage(errorBox, 'This account does not have enough security questions configured.');
-                    return;
-                }
-
-                data.questions.forEach((question, index) => {
-                    challengeFields.appendChild(createSecurityQuestionField(question, index));
-                });
-
-                setupRealtimeValidation(form);
-                setStage('questions');
-                setMessage(successBox, data.message || 'Security questions loaded.');
-            } catch (error) {
-                console.error(error);
-                setMessage(errorBox, 'Failed to load security questions');
-            }
-
-            return;
-        }
-
-        if (stage === 'questions') {
-            const answers = collectRecoveryAnswers();
-
-            if (!answers) {
-                setMessage(errorBox, 'Answer both security questions to continue.');
-                return;
-            }
-
-            try {
-                const response = await fetch('api/auth/verify-security.php', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: emailField.value.trim(),
-                        answers,
-                    }),
-                });
-                const data = await response.json();
-
-                if (!data.success) {
-                    setMessage(errorBox, data.message || 'Security verification failed');
-                    return;
-                }
-
-                resetToken = data.token || '';
-                setStage('reset');
-                setMessage(successBox, data.message || 'Security answers verified.');
-            } catch (error) {
-                console.error(error);
-                setMessage(errorBox, 'Security verification failed');
-            }
-
-            return;
-        }
-
-        if (!validateResetFields()) {
-            setMessage(errorBox, 'Enter a valid new password and confirm it.');
-            return;
-        }
-
-        try {
-            const response = await fetch('api/auth/reset-password.php', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    token: resetToken,
-                    password: resetPasswordField.value,
-                    password_confirm: resetPasswordConfirmField.value,
-                }),
-            });
-            const data = await response.json();
-
-            if (!data.success) {
-                setMessage(errorBox, data.message || 'Password reset failed');
-                return;
-            }
-
-            setMessage(successBox, data.message || 'Password reset successful');
-            submitButton.disabled = true;
+function setupResetPasswordFlow() {
+    setupAsyncAuthForm('resetPasswordForm', {
+        url: 'api/auth/reset-password.php',
+        errorMessage: 'Password reset failed. Try the reset link again.',
+        onSuccess: ({ form, data, successBox, errorBox }) => {
+            setMessage(errorBox, '');
+            setMessage(successBox, data.message || 'Password reset successful.');
+            form.querySelector('[type="submit"]')?.setAttribute('disabled', 'disabled');
             window.setTimeout(() => {
                 window.location.href = 'login.php';
             }, 1200);
-        } catch (error) {
-            console.error(error);
-            setMessage(errorBox, 'Password reset failed');
-        }
+        },
     });
-
-    backButton.addEventListener('click', () => {
-        setMessage(errorBox, '');
-        setMessage(successBox, '');
-        clearFormFieldErrors(form);
-        setStage('email');
-        emailField.focus();
-    });
-
-    setStage('email');
 }
 
 window.addEventListener('load', () => {
@@ -658,7 +376,19 @@ window.addEventListener('load', () => {
     });
 });
 
-document.addEventListener('DOMContentLoaded', async () => {
+setupAsyncAuthForm('loginForm', {
+    url: 'api/auth/login.php',
+    onSuccessRedirect: 'dashboard.php',
+    errorMessage: 'Login failed. Try again.',
+});
+
+setupAsyncAuthForm('registerForm', {
+    url: 'api/auth/register.php',
+    onSuccessRedirect: 'login.php',
+    errorMessage: 'Registration failed. Try again.',
+});
+
+document.addEventListener('DOMContentLoaded', () => {
     const page = document.body.dataset.page;
 
     if (page === 'forgot') {
@@ -666,63 +396,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    if (page !== 'register') {
-        return;
+    if (page === 'reset') {
+        setupResetPasswordFlow();
     }
-
-    const q1Select = document.getElementById('security_question_1');
-    const q2Select = document.getElementById('security_question_2');
-    const securityNote = document.querySelector('.security-note');
-
-    if (!q1Select || !q2Select) {
-        return;
-    }
-
-    try {
-        const response = await fetch('api/auth/security-questions.php', {
-            headers: {
-                Accept: 'application/json',
-            },
-        });
-        const data = await response.json();
-
-        if (data.success && Array.isArray(data.questions) && data.questions.length > 0) {
-            data.questions.forEach((question) => {
-                const option1 = document.createElement('option');
-                option1.value = question.id;
-                option1.textContent = question.question;
-
-                const option2 = document.createElement('option');
-                option2.value = question.id;
-                option2.textContent = question.question;
-
-                q1Select.appendChild(option1);
-                q2Select.appendChild(option2);
-            });
-        } else if (securityNote) {
-            securityNote.textContent = 'No security questions are available yet. Import the updated database seed data first.';
-        }
-    } catch (error) {
-        console.error('Failed to load security questions:', error);
-        if (securityNote) {
-            securityNote.textContent = 'Failed to load security questions. Check the database seed data and API response.';
-        }
-    }
-
-    const syncQuestionOptions = () => {
-        const selectedQuestionOne = q1Select.value;
-        const selectedQuestionTwo = q2Select.value;
-
-        Array.from(q1Select.options).forEach((option) => {
-            option.disabled = option.value !== '' && option.value === selectedQuestionTwo;
-        });
-
-        Array.from(q2Select.options).forEach((option) => {
-            option.disabled = option.value !== '' && option.value === selectedQuestionOne;
-        });
-    };
-
-    q1Select.addEventListener('change', syncQuestionOptions);
-    q2Select.addEventListener('change', syncQuestionOptions);
-    syncQuestionOptions();
 });
