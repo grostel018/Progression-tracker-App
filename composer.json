@@ -1,0 +1,29 @@
+{
+    "name": "rostel/progression-tracker-app",
+    "description": "Server-rendered PHP application for tracking dreams, goals, categories, and activity history.",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "src\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "assets:sync": "@php scripts/sync-assets.php",
+        "assets:check": "@php scripts/sync-assets.php --check",
+        "migrate:status": "@php scripts/migrate.php status",
+        "migrate:up": "@php scripts/migrate.php up",
+        "migrate:baseline": "@php scripts/migrate.php baseline-current",
+        "test": "@php tests/run.php"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

@@ -9,16 +9,10 @@ declare(strict_types=1);
 
 // Load all config files on first load
 if (!isset($GLOBALS['config_loaded'])) {
-    $GLOBALS['config'] = [];
     $configDir = defined('BASE_PATH')
         ? BASE_PATH . '/config/'
         : dirname(__DIR__, 2) . '/config/';
-    if (file_exists($configDir . 'database.php')) {
-        $GLOBALS['config']['database'] = require $configDir . 'database.php';
-    }
-    if (file_exists($configDir . 'app.php')) {
-        $GLOBALS['config']['app'] = require $configDir . 'app.php';
-    }
+    $GLOBALS['config'] = \src\lib\ConfigLoader::loadDirectory($configDir, ['database', 'app']);
     $GLOBALS['config_loaded'] = true;
 }
 
@@ -44,7 +38,6 @@ if (!function_exists('config')) {
         return $current;
     }
 }
-
 if (!function_exists('view')) {
     /**
      * Render a view template
@@ -149,7 +142,24 @@ if (!function_exists('boot_database')) {
      */
     function boot_database(): void
     {
-        \src\lib\Database::init(config('database'));
+        app_container()->db();
+    }
+}
+
+if (!function_exists('app_container')) {
+    /**
+     * Get the shared application container for the current request.
+     */
+    function app_container(): \src\lib\AppContainer
+    {
+        static $container = null;
+
+        if ($container instanceof \src\lib\AppContainer) {
+            return $container;
+        }
+
+        $container = new \src\lib\AppContainer();
+        return $container;
     }
 }
 
@@ -250,17 +260,8 @@ if (!function_exists('auth_manager')) {
      */
     function auth_manager(): \src\lib\Auth
     {
-        static $auth = null;
-
-        if ($auth instanceof \src\lib\Auth) {
-            return $auth;
-        }
-
-        boot_database();
         start_app_session();
-
-        $auth = new \src\lib\Auth(\src\lib\Database::getConnection(), config('app'));
-        return $auth;
+        return app_container()->auth();
     }
 }
 

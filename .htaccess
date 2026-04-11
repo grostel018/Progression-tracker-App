@@ -3,7 +3,7 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    RewriteRule ^(?:src|config|DB|var|scripts|legacy|design|\.git|\.codex|\.claude|\.kombai)(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:src|config|DB|var|scripts|legacy|archive|design|\.git|\.codex|\.claude|\.kombai)(?:/|$) - [F,L,NC]
     RewriteRule ^(?:README\.md|CHANGELOG\.md|progression-tracker-.*\.html)$ - [F,L,NC]
     RewriteRule \.(?:sql|sqlite|bak|env|ini|log)$ - [F,L,NC]
 </IfModule>

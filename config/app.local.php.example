@@ -1,0 +1,6 @@
+<?php
+
+return [
+    // Respect container env vars when present; default browser URL is the Docker app port.
+    'app_url' => getenv('APP_URL') ?: 'http://localhost:8080',
+];

@@ -13,10 +13,13 @@ class HistoryService
     private HistoryRepository $historyRepository;
     private TrackableRepository $trackableRepository;
 
-    public function __construct()
+    public function __construct(
+        ?HistoryRepository $historyRepository = null,
+        ?TrackableRepository $trackableRepository = null
+    )
     {
-        $this->historyRepository = new HistoryRepository();
-        $this->trackableRepository = new TrackableRepository();
+        $this->historyRepository = $historyRepository ?? new HistoryRepository();
+        $this->trackableRepository = $trackableRepository ?? new TrackableRepository();
     }
 
     public function getDashboardOverview(int $userId, string $rangeKey): array

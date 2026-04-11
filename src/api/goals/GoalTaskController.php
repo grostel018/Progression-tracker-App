@@ -11,10 +11,10 @@ class GoalTaskController
     private Auth $auth;
     private GoalTrackingService $service;
 
-    public function __construct()
+    public function __construct(?Auth $auth = null, ?GoalTrackingService $service = null)
     {
-        $this->auth = new Auth(Database::getConnection(), config('app'));
-        $this->service = new GoalTrackingService();
+        $this->auth = $auth ?? new Auth(Database::getConnection(), config('app'));
+        $this->service = $service ?? new GoalTrackingService();
     }
 
     public function index(int $goalId): array

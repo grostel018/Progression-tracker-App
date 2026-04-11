@@ -1,0 +1,430 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  TESTER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum ProfileVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum ThemePreference {
+  SYSTEM
+  DARK
+  LIGHT
+}
+
+enum CategoryStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum DreamStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+enum GoalStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum GoalProgressType {
+  BINARY
+  PERCENT
+  TARGET_COUNT
+}
+
+enum HabitStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum HabitFrequency {
+  DAILY
+  WEEKDAYS
+  WEEKLY
+  CUSTOM
+}
+
+enum TaskStatus {
+  TODO
+  DONE
+  ARCHIVED
+}
+
+enum ReminderCadence {
+  DAILY
+  WEEKLY
+}
+
+enum ReminderDeliveryStatus {
+  SENT
+  SKIPPED
+  FAILED
+}
+
+enum AdminAuditAction {
+  USER_SUSPENDED
+  USER_RESTORED
+  TESTER_GRANTED
+  TESTER_REVOKED
+  VERIFICATION_RESENT
+  PASSWORD_RESET_SENT
+}
+
+model User {
+  id                        String                @id @default(cuid())
+  name                      String?
+  email                     String?               @unique
+  emailVerified             DateTime?
+  image                     String?
+  username                  String?               @unique
+  passwordHash              String?
+  role                      UserRole              @default(USER)
+  status                    UserStatus            @default(ACTIVE)
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+  profile                   Profile?
+  onboardingPreference      OnboardingPreference?
+  reminderPreference        ReminderPreference?
+  categories                Category[]
+  dreams                    Dream[]
+  goals                     Goal[]
+  habits                    Habit[]
+  tasks                     Task[]
+  weeklyReviews             WeeklyReview[]
+  reminderDeliveries        ReminderDelivery[]
+  adminAuditEntriesAsActor  AdminAuditLog[]       @relation("AdminAuditActor")
+  adminAuditEntriesAsTarget AdminAuditLog[]       @relation("AdminAuditTarget")
+  accounts                  Account[]
+  sessions                  Session[]
+
+  @@index([role])
+  @@index([status])
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Profile {
+  id                   String            @id @default(cuid())
+  userId               String            @unique
+  displayName          String?
+  avatarUrl            String?
+  avatarStorageKey     String?
+  bio                  String?
+  gender               String?
+  uiThemePreference    ThemePreference   @default(SYSTEM)
+  visibility           ProfileVisibility @default(PRIVATE)
+  allowDiscoverability Boolean           @default(false)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OnboardingPreference {
+  id                        String   @id @default(cuid())
+  userId                    String   @unique
+  focusArea                 String?
+  motivationStyle           String?
+  dailyCommitmentMinutes    Int?
+  primaryObstacle           String?
+  ninetyDayVision           String?
+  completedStepIds          Json?
+  struggleAreas             Json?
+  reminderPreferenceSummary String?
+  onboardingCompletedAt     DateTime?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id          String         @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  status      CategoryStatus @default(ACTIVE)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dreams Dream[]
+  goals  Goal[]
+
+  @@unique([userId, name])
+  @@index([userId, status])
+}
+
+model Dream {
+  id          String      @id @default(cuid())
+  userId      String
+  categoryId  String?
+  title       String
+  description String?
+  vision      String?
+  status      DreamStatus @default(ACTIVE)
+  targetDate  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  goals    Goal[]
+
+  @@index([userId, status])
+  @@index([categoryId])
+}
+
+model Goal {
+  id           String           @id @default(cuid())
+  userId       String
+  categoryId   String?
+  dreamId      String?
+  title        String
+  description  String?
+  status       GoalStatus       @default(ACTIVE)
+  progressType GoalProgressType @default(BINARY)
+  targetDate   DateTime?
+  targetValue  Int?
+  currentValue Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  dream    Dream?    @relation(fields: [dreamId], references: [id], onDelete: SetNull)
+  habits   Habit[]
+  tasks    Task[]
+  logs     GoalLog[]
+
+  @@index([userId, status])
+  @@index([categoryId])
+  @@index([dreamId])
+}
+
+model GoalLog {
+  id            String   @id @default(cuid())
+  goalId         String
+  loggedAt       DateTime
+  progressValue  Int
+  note           String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId, loggedAt])
+}
+
+model Habit {
+  id          String              @id @default(cuid())
+  userId      String
+  goalId      String?
+  title       String
+  description String?
+  status      HabitStatus         @default(ACTIVE)
+  frequency   HabitFrequency      @default(DAILY)
+  customDays  Json?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  completions HabitCompletion[]
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal Goal? @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([goalId])
+}
+
+model HabitCompletion {
+  id           String   @id @default(cuid())
+  habitId       String
+  completedFor String
+  completedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, completedFor])
+  @@index([completedFor])
+}
+
+model Task {
+  id           String          @id @default(cuid())
+  userId       String
+  goalId       String?
+  title        String
+  description  String?
+  status       TaskStatus      @default(TODO)
+  scheduledFor DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  completion   TaskCompletion?
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal Goal? @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([goalId])
+  @@index([scheduledFor])
+}
+
+model TaskCompletion {
+  id          String   @id @default(cuid())
+  taskId       String   @unique
+  completedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([completedAt])
+}
+
+model WeeklyReview {
+  id              String    @id @default(cuid())
+  userId          String
+  reviewWeekStart DateTime
+  reviewWeekEnd   DateTime
+  summarySnapshot Json?
+  reflection      String?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewWeekStart])
+  @@index([userId, completedAt])
+}
+
+model ReminderPreference {
+  id                        String           @id @default(cuid())
+  userId                    String           @unique
+  enabled                   Boolean          @default(false)
+  cadence                   ReminderCadence  @default(DAILY)
+  timeOfDay                 String           @default("09:00")
+  timezone                  String           @default("UTC")
+  weekdays                  Json?
+  includeDueTasks           Boolean          @default(true)
+  includeOverdueTasks       Boolean          @default(true)
+  includeHabitNudges        Boolean          @default(true)
+  includeWeeklyReviewPrompt Boolean          @default(true)
+  lastDispatchedAt          DateTime?
+  deliveries                ReminderDelivery[]
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([enabled, cadence])
+}
+
+model ReminderDelivery {
+  id                   String                 @id @default(cuid())
+  userId               String
+  reminderPreferenceId String?
+  cadence              ReminderCadence
+  scheduledFor         DateTime
+  status               ReminderDeliveryStatus
+  summary              Json?
+  failureReason        String?
+  deliveryMode         String?
+  previewPath          String?
+  sentAt               DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminderPreference ReminderPreference? @relation(fields: [reminderPreferenceId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, cadence, scheduledFor])
+  @@index([status, scheduledFor])
+  @@index([userId, scheduledFor])
+}
+
+model AdminAuditLog {
+  id           String           @id @default(cuid())
+  actorUserId  String
+  targetUserId String?
+  action       AdminAuditAction
+  metadata     Json?
+  createdAt    DateTime         @default(now())
+
+  actorUser  User  @relation("AdminAuditActor", fields: [actorUserId], references: [id], onDelete: Cascade)
+  targetUser User? @relation("AdminAuditTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId, createdAt])
+  @@index([targetUserId, createdAt])
+  @@index([action, createdAt])
+}
+
+
+
+
+

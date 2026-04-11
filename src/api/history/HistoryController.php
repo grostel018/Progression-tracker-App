@@ -11,10 +11,10 @@ class HistoryController
     private Auth $auth;
     private HistoryService $service;
 
-    public function __construct()
+    public function __construct(?Auth $auth = null, ?HistoryService $service = null)
     {
-        $this->auth = new Auth(Database::getConnection(), config('app'));
-        $this->service = new HistoryService();
+        $this->auth = $auth ?? new Auth(Database::getConnection(), config('app'));
+        $this->service = $service ?? new HistoryService();
     }
 
     public function overview(array $query): array

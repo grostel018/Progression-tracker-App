@@ -89,11 +89,13 @@ class Auth
             return 'Invalid credentials';
         }
 
+        $userId = (int) $user['id'];
+
         if ($user['password_hash'] && password_needs_rehash($user['password_hash'], $this->config['password_algorithm'] ?? PASSWORD_DEFAULT)) {
-            $this->updatePasswordHash($user['id'], $password);
+            $this->updatePasswordHash($userId, $password);
         }
 
-        $this->login($user['id']);
+        $this->login($userId);
         return true;
     }
 

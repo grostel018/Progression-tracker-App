@@ -15,11 +15,16 @@ class CategoryController
     private CategoryRepository $repository;
     private ActivityLogRepository $activityLogRepository;
 
-    public function __construct()
+    public function __construct(
+        ?Auth $auth = null,
+        ?CategoryRepository $repository = null,
+        ?ActivityLogRepository $activityLogRepository = null
+    )
     {
-        $this->auth = new Auth(Database::getConnection(), config('app'));
-        $this->repository = new CategoryRepository();
-        $this->activityLogRepository = new ActivityLogRepository();
+        $db = null;
+        $this->auth = $auth ?? new Auth($db ??= Database::getConnection(), config('app'));
+        $this->repository = $repository ?? new CategoryRepository();
+        $this->activityLogRepository = $activityLogRepository ?? new ActivityLogRepository($db ?? Database::getConnection());
     }
 
     public function index(): array

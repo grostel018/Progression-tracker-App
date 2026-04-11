@@ -16,12 +16,17 @@ class ForgotPasswordHandler
     private PasswordResetTokenRepository $passwordResetTokens;
     private PasswordResetMailer $mailer;
 
-    public function __construct()
+    public function __construct(
+        ?PDO $db = null,
+        ?AuthInputValidator $validator = null,
+        ?RateLimiter $rateLimiter = null,
+        ?PasswordResetTokenRepository $passwordResetTokens = null
+    )
     {
-        $this->db = Database::getConnection();
-        $this->validator = new AuthInputValidator(config('app'));
-        $this->rateLimiter = new RateLimiter();
-        $this->passwordResetTokens = new PasswordResetTokenRepository();
+        $this->db = $db ?? Database::getConnection();
+        $this->validator = $validator ?? new AuthInputValidator(config('app'));
+        $this->rateLimiter = $rateLimiter ?? new RateLimiter();
+        $this->passwordResetTokens = $passwordResetTokens ?? new PasswordResetTokenRepository();
         $this->mailer = new PasswordResetMailer(config('app.mail', []));
     }
 

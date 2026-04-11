@@ -14,12 +14,17 @@ class GoalLogController
     private HistoryRepository $historyRepository;
     private HistoryService $historyService;
 
-    public function __construct()
+    public function __construct(
+        ?Auth $auth = null,
+        ?GoalRepository $goalRepository = null,
+        ?HistoryRepository $historyRepository = null,
+        ?HistoryService $historyService = null
+    )
     {
-        $this->auth = new Auth(Database::getConnection(), config('app'));
-        $this->goalRepository = new GoalRepository();
-        $this->historyRepository = new HistoryRepository();
-        $this->historyService = new HistoryService();
+        $this->auth = $auth ?? new Auth(Database::getConnection(), config('app'));
+        $this->goalRepository = $goalRepository ?? new GoalRepository();
+        $this->historyRepository = $historyRepository ?? new HistoryRepository();
+        $this->historyService = $historyService ?? new HistoryService();
     }
 
     public function index(int $goalId): array

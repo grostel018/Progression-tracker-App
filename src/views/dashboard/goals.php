@@ -2,7 +2,7 @@
 $pageId = 'goals';
 $pageTitle = 'My Goals';
 $activePage = 'goals';
-$pageScripts = ['goals.js'];
+$pageScripts = ['goals-composer.js', 'goals-workspace.js', 'goals.js'];
 include __DIR__ . '/../partials/dashboard-start.php';
 ?>
 <header class="page-header">

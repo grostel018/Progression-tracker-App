@@ -18,12 +18,18 @@ class DreamController
     private CategoryRepository $categoryRepository;
     private ActivityLogRepository $activityLogRepository;
 
-    public function __construct()
+    public function __construct(
+        ?Auth $auth = null,
+        ?DreamRepository $repository = null,
+        ?CategoryRepository $categoryRepository = null,
+        ?ActivityLogRepository $activityLogRepository = null
+    )
     {
-        $this->auth = new Auth(Database::getConnection(), config('app'));
-        $this->repository = new DreamRepository();
-        $this->categoryRepository = new CategoryRepository();
-        $this->activityLogRepository = new ActivityLogRepository();
+        $db = null;
+        $this->auth = $auth ?? new Auth($db ??= Database::getConnection(), config('app'));
+        $this->repository = $repository ?? new DreamRepository();
+        $this->categoryRepository = $categoryRepository ?? new CategoryRepository();
+        $this->activityLogRepository = $activityLogRepository ?? new ActivityLogRepository($db ?? Database::getConnection());
     }
 
     /**

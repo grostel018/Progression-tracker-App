@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../src/bootstrap.php';
 
-use src\api\goals\GoalLogController;
-
 boot_api();
 
-$controller = new GoalLogController();
+$controller = app_container()->goalLogController();
 $goalId = request_query_int('goal_id');
 $logId = request_query_int('id');
 $input = request_input();

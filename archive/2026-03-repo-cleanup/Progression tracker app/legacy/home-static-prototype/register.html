@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Tracking App</title>
+    <meta name="description" content="Progression Tracker App register page">
+
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+</head>
+
+<body data-page="register">
+
+
+<div class="container">
+
+<header>
+    <h1 id="title"></h1>
+    <hr color="#00ff00">
+</header>
+
+<main>
+<section class="auth-section">
+
+    <h2 id="subtitle"></h2>
+
+    <form action="backend/register.php" method="POST" id="registerForm" novalidate>
+
+        <!-- Email -->
+        <div class="inputs">
+            <label for="email">E-mail</label>
+            <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                placeholder="example@mail.com" 
+                autocomplete="email"
+                required>
+        </div>
+
+
+        <!-- Username -->
+        <div class="inputs">
+            <label for="username">Username</label>
+            <input 
+                type="text" 
+                id="username" 
+                name="username" 
+                placeholder="RostelG"
+                required>
+        </div>
+
+
+        <!-- Password -->
+        <div class="inputs">
+            <label for="password">Password</label>
+            <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                minlength="6" 
+                autocomplete="new-password"
+                required>
+        </div>
+
+        <!-- Repeat Password -->
+        <div class="inputs">
+            <label for="password2">Repeat Password</label>
+            <input 
+                type="password" 
+                id="password2" 
+                name="password2" 
+                minlength="6" 
+                autocomplete="new-password"
+                required>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error" aria-live="polite"></div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary">Register</button>
+
+        <!-- Login Link -->
+        <p class="register-text">
+            <strong>Old user?</strong>
+            <a href="login.html">Click here to Login</a>
+        </p>
+
+    </form>
+
+</section>
+</main>
+
+<footer>
+    <p>&copy; 2026 Rostel Ebele GENI NDOUDI. All rights reserved.</p>
+</footer>
+
+</div>
+
+</body>
+</html>

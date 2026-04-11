@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../src/bootstrap.php';
 
-use src\api\history\HistoryController;
-
 boot_api();
 
-$controller = new HistoryController();
+$controller = app_container()->historyController();
 $mode = strtolower((string) ($_GET['mode'] ?? 'overview'));
 $input = request_input();
 

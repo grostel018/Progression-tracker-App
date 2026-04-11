@@ -1,0 +1,10 @@
+<?php
+
+return [
+    // Respect Docker/container env vars when present; fall back to host access defaults.
+    'host' => getenv('DB_HOST') ?: '127.0.0.1',
+    'port' => (int) (getenv('DB_PORT') ?: 3307),
+    'dbname' => getenv('DB_NAME') ?: 'progression_tracker',
+    'user' => getenv('DB_USER') ?: 'progression_user',
+    'pass' => getenv('DB_PASS') ?: 'progression_pass',
+];

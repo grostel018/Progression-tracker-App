@@ -1,0 +1,9 @@
+.git
+.codex
+.claude
+.kombai
+node_modules
+vendor
+var/sessions
+var/logs
+mysql_data

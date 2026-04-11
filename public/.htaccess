@@ -11,6 +11,9 @@ Options -Indexes
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP_HOST} !^localhost(?::\d+)?$ [NC]
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1(?::\d+)?$ [NC]
+    RewriteCond %{HTTP_HOST} !^192\.168\.\d{1,3}\.\d{1,3}(?::\d+)?$ [NC]
+    RewriteCond %{HTTP_HOST} !^10\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?$ [NC]
+    RewriteCond %{HTTP_HOST} !^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}(?::\d+)?$ [NC]
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
     # Redirect all requests to index.php

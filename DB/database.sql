@@ -1,8 +1,8 @@
-CREATE DATABASE progression_tracker;
+CREATE DATABASE IF NOT EXISTS progression_tracker;
 USE progression_tracker;
 
 -- USERS
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(100) UNIQUE NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE users (
 
 
 -- CATEGORIES
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE categories (
 
 
 -- DREAMS
-CREATE TABLE dreams (
+CREATE TABLE IF NOT EXISTS dreams (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     category_id INT NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE dreams (
 
 
 -- GOALS
-CREATE TABLE goals (
+CREATE TABLE IF NOT EXISTS goals (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     dream_id INT NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE goals (
 
 
 -- HISTORY ENTRIES
-CREATE TABLE history_entries (
+CREATE TABLE IF NOT EXISTS history_entries (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     entity_type ENUM('goal','dream') NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE history_entries (
 
 
 -- PROGRESS SNAPSHOTS
-CREATE TABLE progress_snapshots (
+CREATE TABLE IF NOT EXISTS progress_snapshots (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     entity_type ENUM('goal','dream') NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE progress_snapshots (
 
 
 -- GOAL TASKS
-CREATE TABLE goal_tasks (
+CREATE TABLE IF NOT EXISTS goal_tasks (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     goal_id INT NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE goal_tasks (
 
 
 -- GOAL HABITS
-CREATE TABLE goal_habits (
+CREATE TABLE IF NOT EXISTS goal_habits (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     goal_id INT NOT NULL,
@@ -135,7 +135,7 @@ CREATE TABLE goal_habits (
 
 
 -- GOAL HABIT LOGS
-CREATE TABLE goal_habit_logs (
+CREATE TABLE IF NOT EXISTS goal_habit_logs (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     habit_id INT NOT NULL,
@@ -152,7 +152,7 @@ CREATE TABLE goal_habit_logs (
 
 
 -- AUDIT ACTIVITY LOGS
-CREATE TABLE activity_logs (
+CREATE TABLE IF NOT EXISTS activity_logs (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     action VARCHAR(100) NOT NULL,
@@ -165,7 +165,7 @@ CREATE TABLE activity_logs (
 
 
 -- STREAKS
-CREATE TABLE streaks (
+CREATE TABLE IF NOT EXISTS streaks (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     current_streak INT DEFAULT 0,
@@ -176,7 +176,7 @@ CREATE TABLE streaks (
 
 
 -- ACHIEVEMENTS
-CREATE TABLE achievements (
+CREATE TABLE IF NOT EXISTS achievements (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -185,7 +185,7 @@ CREATE TABLE achievements (
 
 
 -- USER ACHIEVEMENTS
-CREATE TABLE user_achievements (
+CREATE TABLE IF NOT EXISTS user_achievements (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     achievement_id INT NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE user_achievements (
 
 
 -- SESSIONS
-CREATE TABLE sessions (
+CREATE TABLE IF NOT EXISTS sessions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     session_token VARCHAR(255) UNIQUE NOT NULL,
@@ -207,7 +207,7 @@ CREATE TABLE sessions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- PASSWORD RESET TOKENS
-CREATE TABLE password_reset_tokens (
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     token_hash CHAR(64) NOT NULL,
@@ -221,3 +221,14 @@ CREATE TABLE password_reset_tokens (
     INDEX idx_password_reset_user_active (user_id, used_at, expires_at),
     INDEX idx_password_reset_expiry (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- SCHEMA MIGRATIONS
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    filename VARCHAR(255) PRIMARY KEY,
+    applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT IGNORE INTO schema_migrations (filename) VALUES
+    ('20260324_progress_history_analytics.sql'),
+    ('20260329_auth_security_hardening.sql'),
+    ('20260329_remove_security_questions.sql');

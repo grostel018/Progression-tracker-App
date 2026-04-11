@@ -14,17 +14,30 @@ use src\lib\RateLimiter;
  */
 class LoginHandler
 {
+    private const EMAIL_MAX_ATTEMPTS = 10;
+    private const EMAIL_WINDOW_SECONDS = 900;
+    private const IP_MAX_ATTEMPTS = 50;
+    private const IP_WINDOW_SECONDS = 900;
+
     private PDO $db;
     private Auth $auth;
     private AuthInputValidator $validator;
     private RateLimiter $rateLimiter;
+    private ActivityLogRepository $activityLogRepository;
 
-    public function __construct()
+    public function __construct(
+        ?PDO $db = null,
+        ?Auth $auth = null,
+        ?AuthInputValidator $validator = null,
+        ?RateLimiter $rateLimiter = null,
+        ?ActivityLogRepository $activityLogRepository = null
+    )
     {
-        $this->db = Database::getConnection();
-        $this->auth = new Auth($this->db, config('app'));
-        $this->validator = new AuthInputValidator(config('app'));
-        $this->rateLimiter = new RateLimiter();
+        $this->db = $db ?? Database::getConnection();
+        $this->auth = $auth ?? new Auth($this->db, config('app'));
+        $this->validator = $validator ?? new AuthInputValidator(config('app'));
+        $this->rateLimiter = $rateLimiter ?? new RateLimiter();
+        $this->activityLogRepository = $activityLogRepository ?? new ActivityLogRepository($this->db);
     }
 
     public function handle(array $input): array
@@ -40,8 +53,13 @@ class LoginHandler
         $ipKey = 'auth:login:ip:' . request_ip();
         $emailKey = 'auth:login:email:' . hash('sha256', strtolower($email));
 
-        foreach ([$ipKey, $emailKey] as $key) {
-            $limit = $this->rateLimiter->check($key, 10, 900);
+        $limits = [
+            $ipKey => [self::IP_MAX_ATTEMPTS, self::IP_WINDOW_SECONDS],
+            $emailKey => [self::EMAIL_MAX_ATTEMPTS, self::EMAIL_WINDOW_SECONDS],
+        ];
+
+        foreach ($limits as $key => [$maxAttempts, $windowSeconds]) {
+            $limit = $this->rateLimiter->consume($key, $maxAttempts, $windowSeconds);
             if (!$limit['allowed']) {
                 return [
                     'success' => false,
@@ -56,18 +74,14 @@ class LoginHandler
         if ($result === true) {
             $userId = $this->auth->id();
 
-            $this->rateLimiter->clear($ipKey);
             $this->rateLimiter->clear($emailKey);
 
             if ($userId !== null) {
-                (new ActivityLogRepository())->trackLogin($userId);
+                $this->activityLogRepository->trackLogin($userId);
             }
 
             return ['success' => true, 'message' => 'Login successful'];
         }
-
-        $this->rateLimiter->hit($ipKey, 900);
-        $this->rateLimiter->hit($emailKey, 900);
 
         return ['success' => false, 'message' => $result];
     }

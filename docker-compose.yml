@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: progression-tracker-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      APP_URL: http://localhost:8080
+      MAIL_TRANSPORT: log
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: progression_tracker
+      DB_USER: progression_user
+      DB_PASS: progression_pass
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: progression-tracker-db
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: progression_tracker
+      MYSQL_USER: progression_user
+      MYSQL_PASSWORD: progression_pass
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./DB/database.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

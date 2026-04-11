@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../src/bootstrap.php';
 
-use src\api\goals\GoalHabitController;
-
 boot_api();
 
-$controller = new GoalHabitController();
+$controller = app_container()->goalHabitController();
 $goalId = request_query_int('goal_id');
 $habitId = request_query_int('id');
 $input = request_input();

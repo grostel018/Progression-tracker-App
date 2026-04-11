@@ -14,12 +14,17 @@ class GoalTrackingService
     private GoalHabitRepository $habitRepository;
     private HistoryRepository $historyRepository;
 
-    public function __construct()
+    public function __construct(
+        ?GoalRepository $goalRepository = null,
+        ?GoalTaskRepository $taskRepository = null,
+        ?GoalHabitRepository $habitRepository = null,
+        ?HistoryRepository $historyRepository = null
+    )
     {
-        $this->goalRepository = new GoalRepository();
-        $this->taskRepository = new GoalTaskRepository();
-        $this->habitRepository = new GoalHabitRepository();
-        $this->historyRepository = new HistoryRepository();
+        $this->goalRepository = $goalRepository ?? new GoalRepository();
+        $this->taskRepository = $taskRepository ?? new GoalTaskRepository();
+        $this->habitRepository = $habitRepository ?? new GoalHabitRepository();
+        $this->historyRepository = $historyRepository ?? new HistoryRepository();
     }
 
     public function listTasks(int $userId, int $goalId): array

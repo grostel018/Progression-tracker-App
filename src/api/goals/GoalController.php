@@ -18,12 +18,18 @@ class GoalController
     private DreamRepository $dreamRepository;
     private ActivityLogRepository $activityLogRepository;
 
-    public function __construct()
+    public function __construct(
+        ?Auth $auth = null,
+        ?GoalRepository $repository = null,
+        ?DreamRepository $dreamRepository = null,
+        ?ActivityLogRepository $activityLogRepository = null
+    )
     {
-        $this->auth = new Auth(Database::getConnection(), config('app'));
-        $this->repository = new GoalRepository();
-        $this->dreamRepository = new DreamRepository();
-        $this->activityLogRepository = new ActivityLogRepository();
+        $db = null;
+        $this->auth = $auth ?? new Auth($db ??= Database::getConnection(), config('app'));
+        $this->repository = $repository ?? new GoalRepository();
+        $this->dreamRepository = $dreamRepository ?? new DreamRepository();
+        $this->activityLogRepository = $activityLogRepository ?? new ActivityLogRepository($db ?? Database::getConnection());
     }
 
     /**

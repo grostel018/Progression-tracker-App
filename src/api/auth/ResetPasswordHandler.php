@@ -18,11 +18,15 @@ class ResetPasswordHandler
     private PasswordResetTokenRepository $passwordResetTokens;
     private RateLimiter $rateLimiter;
 
-    public function __construct()
+    public function __construct(
+        ?PDO $db = null,
+        ?PasswordResetTokenRepository $passwordResetTokens = null,
+        ?RateLimiter $rateLimiter = null
+    )
     {
-        $this->db = Database::getConnection();
-        $this->passwordResetTokens = new PasswordResetTokenRepository();
-        $this->rateLimiter = new RateLimiter();
+        $this->db = $db ?? Database::getConnection();
+        $this->passwordResetTokens = $passwordResetTokens ?? new PasswordResetTokenRepository();
+        $this->rateLimiter = $rateLimiter ?? new RateLimiter();
     }
 
     /**

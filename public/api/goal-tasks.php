@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../src/bootstrap.php';
 
-use src\api\goals\GoalTaskController;
-
 boot_api();
 
-$controller = new GoalTaskController();
+$controller = app_container()->goalTaskController();
 $goalId = request_query_int('goal_id');
 $taskId = request_query_int('id');
 $input = request_input();

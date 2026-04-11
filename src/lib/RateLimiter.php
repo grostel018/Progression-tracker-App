@@ -22,47 +22,57 @@ final class RateLimiter
      */
     public function check(string $key, int $maxAttempts, int $windowSeconds): array
     {
-        $record = $this->load($key);
-        $now = time();
-        $attempts = array_values(array_filter(
-            $record['attempts'] ?? [],
-            static fn (int $timestamp): bool => $timestamp > ($now - $windowSeconds)
-        ));
+        return $this->withLock($key, $windowSeconds, static function (array &$attempts, int $now) use ($maxAttempts, $windowSeconds) {
+            if (count($attempts) < $maxAttempts) {
+                return ['allowed' => true, 'retry_after' => 0];
+            }
 
-        $this->save($key, $attempts);
+            $oldestAttempt = min($attempts);
 
-        if (count($attempts) < $maxAttempts) {
-            return ['allowed' => true, 'retry_after' => 0];
-        }
-
-        $oldestAttempt = min($attempts);
-
-        return [
-            'allowed' => false,
-            'retry_after' => max(1, ($oldestAttempt + $windowSeconds) - $now),
-        ];
+            return [
+                'allowed' => false,
+                'retry_after' => max(1, ($oldestAttempt + $windowSeconds) - $now),
+            ];
+        });
     }
 
     public function hit(string $key, int $windowSeconds): void
     {
-        $record = $this->load($key);
-        $now = time();
-        $attempts = array_values(array_filter(
-            $record['attempts'] ?? [],
-            static fn (int $timestamp): bool => $timestamp > ($now - $windowSeconds)
-        ));
+        $this->withLock($key, $windowSeconds, static function (array &$attempts, int $now) {
+            $attempts[] = $now;
+            return null;
+        });
+    }
 
-        $attempts[] = $now;
-        $this->save($key, $attempts);
+    /**
+     * Atomically check the current window and record the attempt if allowed.
+     *
+     * @return array{allowed:bool,retry_after:int}
+     */
+    public function consume(string $key, int $maxAttempts, int $windowSeconds): array
+    {
+        return $this->withLock($key, $windowSeconds, static function (array &$attempts, int $now) use ($maxAttempts, $windowSeconds) {
+            if (count($attempts) >= $maxAttempts) {
+                $oldestAttempt = min($attempts);
+
+                return [
+                    'allowed' => false,
+                    'retry_after' => max(1, ($oldestAttempt + $windowSeconds) - $now),
+                ];
+            }
+
+            $attempts[] = $now;
+
+            return ['allowed' => true, 'retry_after' => 0];
+        });
     }
 
     public function clear(string $key): void
     {
-        $path = $this->pathFor($key);
-
-        if (is_file($path)) {
-            unlink($path);
-        }
+        $this->withLock($key, null, static function (array &$attempts, int $now) {
+            $attempts = [];
+            return null;
+        });
     }
 
     private function pathFor(string $key): string
@@ -71,38 +81,87 @@ final class RateLimiter
     }
 
     /**
-     * @return array{attempts:array<int, int>}
+     * @template T
+     * @param callable(array<int, int>&, int):T $callback
+     * @return T
      */
-    private function load(string $key): array
+    private function withLock(string $key, ?int $windowSeconds, callable $callback)
     {
         $path = $this->pathFor($key);
+        $handle = fopen($path, 'c+');
 
-        if (!is_file($path)) {
-            return ['attempts' => []];
+        if ($handle === false) {
+            throw new \RuntimeException('Unable to open rate limit storage for key.');
         }
 
-        $decoded = json_decode((string) file_get_contents($path), true);
+        try {
+            if (!flock($handle, LOCK_EX)) {
+                throw new \RuntimeException('Unable to lock rate limit storage for key.');
+            }
 
-        if (!is_array($decoded)) {
-            return ['attempts' => []];
+            $attempts = $this->loadAttempts($handle);
+            $now = time();
+
+            if ($windowSeconds !== null) {
+                $attempts = $this->pruneAttempts($attempts, $now, $windowSeconds);
+            }
+
+            $result = $callback($attempts, $now);
+            $this->writeAttempts($handle, $attempts);
+
+            flock($handle, LOCK_UN);
+
+            return $result;
+        } finally {
+            fclose($handle);
         }
-
-        $attempts = $decoded['attempts'] ?? [];
-
-        return [
-            'attempts' => array_values(array_filter(
-                is_array($attempts) ? $attempts : [],
-                static fn ($timestamp): bool => is_int($timestamp)
-            )),
-        ];
     }
 
     /**
      * @param array<int, int> $attempts
      */
-    private function save(string $key, array $attempts): void
+    private function writeAttempts($handle, array $attempts): void
     {
-        $path = $this->pathFor($key);
-        file_put_contents($path, json_encode(['attempts' => array_values($attempts)], JSON_THROW_ON_ERROR), LOCK_EX);
+        rewind($handle);
+        ftruncate($handle, 0);
+        fwrite($handle, json_encode(['attempts' => array_values($attempts)], JSON_THROW_ON_ERROR));
+        fflush($handle);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function loadAttempts($handle): array
+    {
+        rewind($handle);
+        $contents = stream_get_contents($handle);
+
+        if (!is_string($contents) || trim($contents) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($contents, true);
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        $attempts = $decoded['attempts'] ?? [];
+
+        return array_values(array_filter(
+            is_array($attempts) ? $attempts : [],
+            static fn ($timestamp): bool => is_int($timestamp)
+        ));
+    }
+
+    /**
+     * @param array<int, int> $attempts
+     * @return array<int, int>
+     */
+    private function pruneAttempts(array $attempts, int $now, int $windowSeconds): array
+    {
+        return array_values(array_filter(
+            $attempts,
+            static fn (int $timestamp): bool => $timestamp > ($now - $windowSeconds)
+        ));
     }
 }

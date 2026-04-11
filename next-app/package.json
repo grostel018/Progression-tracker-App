@@ -1,0 +1,66 @@
+{
+  "name": "progression-tracker-next-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Next-generation Progression Tracker MVP foundation.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\" && next build",
+    "start": "next start",
+    "lint": "eslint . --ext .js,.ts,.tsx --max-warnings=0",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
+    "@prisma/client": "^5.20.0",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@sentry/nextjs": "^10.47.0",
+    "bcryptjs": "^3.0.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.7.0",
+    "next": "^14.2.0",
+    "next-auth": "^4.24.13",
+    "nodemailer": "^7.0.13",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^20.14.10",
+    "@types/nodemailer": "^7.0.11",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.0",
+    "fake-indexeddb": "^6.2.5",
+    "postcss": "^8.5.8",
+    "prettier": "^3.3.3",
+    "prisma": "^5.20.0",
+    "tailwindcss": "^4.2.2",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
+
+
+
